@@ -221,8 +221,11 @@ export class SubscriptionTracker extends RE6Module {
     if (this.buttonSelect.minor && Page.matches(this.buttonSelect.minor.regex) && !this.fetchSettings("hideMinorButton")) {
       for (const el of $(this.buttonSelect.minor.selector).get()) {
         const $el = $(el);
+        const subscriptionName = this.fetchMinorSubscriptionName($el);
+        if (!subscriptionName || !subscriptionName.trim()) continue;
+        if ($el.find(".subscribe-button-minor").length) continue;
         const button = this.createSubscribeMinorButton(
-          this.fetchMinorSubscriptionName($el),
+          subscriptionName,
           (id) => { this.slist.subscribe(id); },
           (id) => { this.slist.unsubscribe(id); },
         );
@@ -247,8 +250,11 @@ export class SubscriptionTracker extends RE6Module {
     if (this.buttonSelect.major && Page.matches(this.buttonSelect.major.regex)) {
       for (const el of $(this.buttonSelect.major.selector).get()) {
         const $el = $(el);
+        const subscriptionName = this.fetchMajorSubscriptionName($el);
+        if (!subscriptionName || !subscriptionName.trim()) continue;
+        if ($el.find(".subscribe-button-major").length) continue;
         const button = this.createSubscribeMajorButton(
-          this.fetchMajorSubscriptionName($el),
+          subscriptionName,
           (id) => { this.slist.subscribe(id); },
           (id) => { this.slist.unsubscribe(id); },
         );
@@ -279,12 +285,18 @@ export class SubscriptionTracker extends RE6Module {
         "title": "Subscribe to this tag",
       })
       .addClass("subscribe-button-minor")
-      .on("click", (event) => {
+      .on("click", async (event) => {
         event.preventDefault();
-        if (result.attr("subscribed") == "true")
-          unsubscribe(result.attr("name"));
-        else subscribe(result.attr("name"));
-
+        if (result.attr("loading") == "true") return;
+        result.attr("loading", "true");
+        try {
+          if (result.attr("subscribed") == "true")
+            await unsubscribe(result.attr("name"));
+          else await subscribe(result.attr("name"));
+          result.trigger("re621:update");
+        } finally {
+          result.removeAttr("loading");
+        }
       })
       .on("re621:update", () => {
         result.attr("subscribed", this.slist.isSubscribed(id) + "");
