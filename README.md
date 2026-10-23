@@ -10,10 +10,10 @@ The repository has been **detached from GitHub's fork network** and is maintaine
 
 **Work in progress.** This is not yet a verified, production-ready replacement for upstream re6AI.
 
-- **[`master`](https://github.com/BlackShuck89/re6ai-personal/tree/master)** is the default branch and retains the inherited re6AI codebase until changes are reviewed and merged.
-- **[`development`](https://github.com/BlackShuck89/re6ai-personal/tree/development)** contains the ongoing independent versioning, metadata updates, initial compatibility fixes, and build checks.
+- **[`master`](https://github.com/BlackShuck89/re6ai-personal/tree/master)** is the default branch for reviewed beta/release code.
+- **[`development`](https://github.com/BlackShuck89/re6ai-personal/tree/development)** is used for upcoming fixes, integration, and automated build checks.
 - Changes are reviewed through [pull requests](https://github.com/BlackShuck89/re6ai-personal/pulls) before being brought into `master`.
-- A successful end-to-end test on e6AI and a stable **re6AI Personal** release have not yet been confirmed.
+- A basic user smoke test and GitHub Actions build checks have passed, but complete browser regression testing and a **stable** release are still pending.
 
 This project currently builds on the **re621/re6AI 1.x-era architecture**, not the rewritten re621 2.x codebase. [re621 2.x](https://github.com/re621/re621-alpha) is a reference for potential future enhancements; feature parity has **not** been achieved.
 
@@ -33,9 +33,9 @@ The goals of this independent continuation are to:
 
 The project is intended for a userscript manager such as [Violentmonkey](https://violentmonkey.github.io/) or [Tampermonkey](https://www.tampermonkey.net/).
 
-**There is no verified stable release of re6AI Personal yet.** When one is published, it will appear on this project's [Releases page](https://github.com/BlackShuck89/re6ai-personal/releases). Do not mistake downloads linked by the *original* re6AI project for releases of this independent version.
+**Current channel: beta (1.1.0 Beta 1).** Find the beta's installable `script.user.js` and release notes on [our releases page](https://github.com/BlackShuck89/re6ai-personal/releases). The prerelease is not considered stable; if the beta release has not appeared yet, use a development build instead. Do not mistake downloads from the *original* re6AI project for this independent version.
 
-Until then, the `development` branch can be built locally for testing. Disable any other installed re6AI script while testing this one; running both simultaneously can cause duplicate controls or conflicting behavior. Back up your existing userscript settings before switching builds.
+The beta's userscript update/download URLs point to its exact release tag because GitHub's `/releases/latest` excludes prereleases. Installing a later beta may require a manual update. Disable any other installed re6AI script while testing this one; running both simultaneously can cause duplicate controls or conflicting behavior. Back up your existing userscript settings before switching builds.
 
 ## Build the userscript
 
@@ -51,7 +51,7 @@ bun run compile-sass:prod
 bun run compose-userscript:prod
 ```
 
-The intended userscript output is `build/userscript/script.user.js`. This is a **build procedure, not a claim that the current build or all features have passed validation**. The inherited browser-extension build is not a supported release target at this stage.
+The intended userscript output is `build/userscript/script.user.js`. GitHub Actions builds have passed, but not all functionality has been regression-tested. The inherited browser-extension build is not a supported release target at this stage.
 
 ## Original projects and attribution
 
