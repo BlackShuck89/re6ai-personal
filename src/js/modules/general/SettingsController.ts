@@ -72,8 +72,8 @@ export class SettingsController extends RE6Module {
     // Create a button in the header
     this.openSettingsButton = Util.DOM.addSettingsButton({
       id: "header-button-settings",
-      name: `${Icons.get("wrench")} <span>RE621</span>`,
-      title: "RE6AI Settings",
+      name: `${Icons.get("wrench")} <span>re6AI Personal</span>`,
+      title: "re6AI Personal Settings",
       tabClass: "nav-re6-settings",
       attr: {
         "data-loading": "false",
@@ -2032,7 +2032,7 @@ export class SettingsController extends RE6Module {
           ...createInputs(postViewer, "Toggle Notes", "hotkeyHideNotes"),
           ...createInputs(postViewer, "Edit Notes", "hotkeyNewNote"),
           ...createInputs(postViewer, "Post History", "hotkeyOpenHistory"),
-          ...createInputs(postViewer, "Go To Artist", "hotkeyOpenArtist"),
+          ...createInputs(postViewer, "Go To Director", "hotkeyOpenArtist"),
           ...createInputs(postViewer, "Go To Source", "hotkeyOpenSource"),
           ...createInputs(postViewer, "Go To Parent", "hotkeyOpenParent"),
           ...createInputs(postViewer, "Toggle Child Posts", "hotkeyToggleRel"),
