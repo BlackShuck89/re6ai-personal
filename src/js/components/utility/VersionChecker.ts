@@ -49,9 +49,10 @@ export class VersionChecker {
       try {
         const latestRelease = await VersionChecker.getGithubData("latest");
 
-        if (!latestRelease || !latestRelease.name) throw "Malformed GitHub response";
+        const releaseVersion = (latestRelease?.tag_name || latestRelease?.name || "").replace(/^v/, "");
+        if (!/^\d+(?:\.\d+)+$/.test(releaseVersion)) throw "No valid release version available";
 
-        VersionChecker.latestBuild = latestRelease.name;
+        VersionChecker.latestBuild = releaseVersion;
         VersionChecker.cachedBuild = VersionChecker.scriptBuild;
 
         VersionChecker.hasUpdate = Util.versionCompare(VersionChecker.scriptBuild, VersionChecker.latestBuild) < 0;
@@ -97,7 +98,7 @@ export class VersionChecker {
    * @param node Version number, or "latest"
    */
   private static async getGithubData (node: string): Promise<any> {
-    return XM.Connect.xmlHttpPromise({ url: "https://api.github.com/repos/re621/re6ai/releases/" + node, method: "GET" }).then(
+    return XM.Connect.xmlHttpPromise({ url: "https://api.github.com/repos/BlackShuck89/re6ai-personal/releases/" + node, method: "GET" }).then(
       (response: GMxmlHttpRequestResponse) => { return Promise.resolve(JSON.parse(response.responseText)); },
       () => {
         console.error("Failed to fetch Github release data");
