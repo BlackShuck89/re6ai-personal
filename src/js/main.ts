@@ -23,6 +23,7 @@ import { FormattingExtender } from "./modules/general/FormattingExtender";
 import { HeaderCustomizer } from "./modules/general/HeaderCustomizer";
 import { JanitorEnhancements } from "./modules/general/JanitorEnhancements";
 import { Miscellaneous } from "./modules/general/Miscellaneous";
+import { ProfileEnhancer } from "./modules/general/ProfileEnhancer";
 import { SettingsController } from "./modules/general/SettingsController";
 import { ThemeCustomizer } from "./modules/general/ThemeCustomizer";
 import { EditTracker } from "./modules/misc/EditTracker";
@@ -74,6 +75,7 @@ const loadOrder = [
   PostSuggester,
   SearchUtilities,
   Miscellaneous,
+  ProfileEnhancer,
 
   SmartAlias,
   TagSuggester,
