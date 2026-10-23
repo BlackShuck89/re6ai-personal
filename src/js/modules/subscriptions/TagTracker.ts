@@ -43,7 +43,10 @@ export class TagTracker extends SubscriptionTracker {
   }
 
   protected fetchMinorSubscriptionName (element: JQuery<HTMLElement>): string {
-    return decodeURIComponent(element.attr("data-tag"));
+    const tag = element.attr("data-tag");
+    if (!tag) return "";
+    try { return decodeURIComponent(tag); }
+    catch { return tag; }
   }
 
   protected fetchMajorSubscriptionName (element: JQuery<HTMLElement>): string {
