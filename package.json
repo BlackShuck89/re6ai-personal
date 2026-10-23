@@ -1,14 +1,15 @@
 {
-  "name": "re6ai",
-  "displayName": "re6ai - e6ai Reimagined",
-  "namespace": "re621.app",
-  "version": "1.0.12",
-  "description": "Subscription manager, mass downloader, thumbnail enhancer, and more for e6ai",
+  "name": "re6ai-personal",
+  "displayName": "re6AI Personal - e6AI Reimagined",
+  "namespace": "https://github.com/BlackShuck89/re6ai-personal",
+  "version": "1.1.0-beta.1",
+  "description": "Independently maintained e6AI enhancements, based on re6AI and re621",
   "author": "bitWolfy",
   "contributors": [
     "bitWolfy",
     "Sindrake",
-    "Earlopain"
+    "Earlopain",
+    "BlackShuck89 (personal fork)"
   ],
   "main": "./build/script.user.js",
   "scripts": {
@@ -79,14 +80,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/re621/re6ai.git"
+    "url": "git+https://github.com/BlackShuck89/re6ai-personal.git"
   },
   "license": "GPLv3",
   "bugs": {
-    "url": "https://github.com/re621/re6ai/issues"
+    "url": "https://github.com/BlackShuck89/re6ai-personal/issues"
   },
-  "homepage": "https://e6ai.net/forum_topics/227",
-  "github": "https://github.com/re621/re6ai",
+  "homepage": "https://github.com/BlackShuck89/re6ai-personal",
+  "github": "https://github.com/BlackShuck89/re6ai-personal",
   "dependencies": {
     "caniuse-lite": "^1.0.30001751",
     "jquery": "^3.6.0",

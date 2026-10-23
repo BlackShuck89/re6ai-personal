@@ -11,8 +11,8 @@
     "match": [
         "https://e6ai.net/*"
     ],
-    "updateURL": "%GITHUB%/releases/latest/download/script.meta.js",
-    "downloadURL": "%GITHUB%/releases/latest/download/script.user.js",
+    "updateURL": "%GITHUB%/releases/download/v1.1.0-beta.1/script.meta.js",
+    "downloadURL": "%GITHUB%/releases/download/v1.1.0-beta.1/script.user.js",
     "require": [
         "https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js",
         "https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js",
@@ -36,8 +36,8 @@
         "GM_removeValueChangeListener",
         "unsafeWindow"
     ],
-    "icon": "https://cdn.jsdelivr.net/gh/re621/re6ai@master/assets/icon64.png",
-    "icon64": "https://cdn.jsdelivr.net/gh/re621/re6ai@master/assets/icon64.png",
+    "icon": "https://cdn.jsdelivr.net/gh/BlackShuck89/re6ai-personal@master/assets/icon64.png",
+    "icon64": "https://cdn.jsdelivr.net/gh/BlackShuck89/re6ai-personal@master/assets/icon64.png",
     "connect": [
         "api.github.com",
         "static1.e6ai.net",

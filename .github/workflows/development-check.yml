@@ -1,0 +1,49 @@
+name: Development checks
+
+on:
+  pull_request:
+  push:
+    branches:
+      - development
+
+jobs:
+  userscript:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+      - name: Use package version for prerelease build
+        run: echo "GIT_TAG_NAME=v$(node -p 'require("./package.json").version')" >> "$GITHUB_ENV"
+      - name: Typecheck and lint
+        run: |
+          bun run eslint
+          bun run typescript
+      - name: Compile script
+        run: |
+          bun run browserify
+          bun run minify
+          bun run template
+      - name: Compile stylesheet
+        run: |
+          bun run sass:prod
+          bun run autoprefixer
+      - name: Build userscript
+        run: bun run compose-userscript:prod
+      - name: Assert generated artifact
+        run: |
+          test -s build/userscript/script.user.js
+          grep -q 're6AI Personal' build/userscript/script.user.js
+          test -s build/userscript/script.meta.js
+          grep -Fq "releases/download/$GIT_TAG_NAME/script.meta.js" build/userscript/script.user.js
+          grep -Fq "releases/download/$GIT_TAG_NAME/script.user.js" build/userscript/script.user.js
+          grep -Fq "1.1.0-beta.1" build/userscript/script.meta.js
+      - name: Upload test artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: re6ai-personal-development-userscript
+          path: build/userscript/script.user.js
+          retention-days: 7

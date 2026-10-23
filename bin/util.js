@@ -22,14 +22,16 @@ module.exports = {
    */
   parseTemplate (input, packageJSON) {
     // const version = process.env.GIT_TAG_NAME === undefined ? package.version : process.env.GIT_TAG_NAME;
-    const version = process.env.GIT_TAG_NAME === undefined ? packageJSON.version.substring(0, packageJSON.version.lastIndexOf(".")) + ".dev0" : process.env.GIT_TAG_NAME;
+    const version = process.env.GIT_TAG_NAME
+      ? process.env.GIT_TAG_NAME.replace(/^v/, "")
+      : packageJSON.version + "-dev.0";
     return input
       .replace(/%NAME%/g, packageJSON.name)
       .replace(/%DISPLAYNAME%/g, packageJSON.displayName)
       .replace(/%NAMESPACE%/g, packageJSON.namespace)
       .replace(/%DESCRIPTION%/g, packageJSON.description)
       .replace(/%AUTHOR%/g, packageJSON.author)
-      .replace(/%VERSION%/g, version.split("-")[0])
+      .replace(/%VERSION%/g, version)
       .replace(/%VERSIONREPO%/, version)
       .replace(/%VERSHORT%/g, packageJSON.version.replace(/\.\d+$/g, ""))
       .replace(/%BUILD%/g, this.getBuildTime())

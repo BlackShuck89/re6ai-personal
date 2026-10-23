@@ -1,50 +1,44 @@
-name: build
+name: Publish tagged userscript release
 on:
   push:
     tags:
-      - "*"
+      - "v*"
       - "!*.dev*"
+
+permissions:
+  contents: write
 
 jobs:
   build:
     runs-on: ubuntu-latest
-
+    env:
+      GIT_TAG_NAME: ${{ github.ref_name }}
     steps:
-      - name: Check out the Repository
+      - name: Check out release revision
         uses: actions/checkout@v4
-        with:
-          fetch-depth: "0"
-
-      - name: Fetch the latest Git tag
-        uses: little-core-labs/get-git-tag@v3.0.2
-
       - name: Set up Bun
-        uses: oven-sh/setup-bun@v1
-        with:
-          bun-version: latest
-
-      - name: Install Project Dependencies
+        uses: oven-sh/setup-bun@v2
+      - name: Install dependencies
         run: bun install --frozen-lockfile
-
-      - name: Compile Typescript & SASS (parallel)
-        run: |
-          bun run compile-typescript:prod &
-          bun run compile-sass:prod &
-          wait
-
-      - name: Build Userscript Files
+      - name: Lint and compile TypeScript
+        run: bun run compile-typescript:prod
+      - name: Compile stylesheet
+        run: bun run compile-sass:prod
+      - name: Build userscript
         run: bun run compose-userscript:prod
-
-      - name: Build Extension Files
-        run: bun run compose-extension:prod
-
-      - name: Create a Release
+      - name: Validate userscript
+        run: |
+          test -s build/userscript/script.user.js
+          test -s build/userscript/script.meta.js
+          grep -Fq "re6AI Personal" build/userscript/script.user.js
+          grep -Fq "releases/download/$GIT_TAG_NAME/script.meta.js" build/userscript/script.user.js
+      - name: Publish GitHub release
         uses: ncipollo/release-action@v1
         with:
-          allowUpdates: true
-          # TODO: Add `,./build/extension/re621.zip` back?
-          artifacts: "./build/userscript/script.user.js,./build/userscript/script.meta.js,./build/userscript/altver.user.js,./build/userscript/altver.meta.js"
-          replacesArtifacts: true
-          omitBody: true
-          prerelease: false
-          token: ${{ secrets.GITHUB_TOKEN }}
+          tag: ${{ github.ref_name }}
+          name: re6AI Personal ${{ github.ref_name }}
+          artifacts: "build/userscript/script.user.js,build/userscript/script.meta.js,build/userscript/altver.user.js,build/userscript/altver.meta.js"
+          prerelease: ${{ contains(github.ref_name, '-beta') || contains(github.ref_name, '-rc') }}
+          makeLatest: ${{ !(contains(github.ref_name, '-beta') || contains(github.ref_name, '-rc')) }}
+          generateReleaseNotes: true
+          allowUpdates: false
