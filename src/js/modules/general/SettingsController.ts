@@ -2131,6 +2131,7 @@ export class SettingsController extends RE6Module {
       ...createInput("FormattingExtender", "Formatting Helper", "Fully customizable toolbar for easy DText formatting."),
 
       ...createInput("SmartAlias", "Smart Alias", "A more intelligent way to quickly fill out post tags."),
+      ...createInput("ProfileEnhancer", "Enhanced User Profiles", "Optional responsive layout for profile uploads and favorites (inspired by re621 2.x). Disabled by default."),
     ]);
   }
 

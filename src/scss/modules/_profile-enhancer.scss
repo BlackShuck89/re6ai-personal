@@ -1,0 +1,75 @@
+// Optional re6AI Personal profile layout.
+// Adapted from the re621 2.x ProfileEnhancer layout concept. GPLv3.
+body[data-re6ai-profile-enhancer="true"] #c-users #a-show {
+  // Preserve native profile content, navigation and links; only presentation
+  // changes when a user explicitly enables the module.
+  .bottom-section {
+    display: block;
+  }
+
+  .posts-section .posts {
+    display: block;
+  }
+
+  .user-favorites,
+  .user-uploads {
+    box-sizing: border-box;
+    display: block;
+    position: relative;
+    min-width: 0;
+    width: 100%;
+    height: auto;
+    margin: 0 0 1rem;
+    padding: 0.75rem 1rem;
+    border-radius: 0.375rem;
+    background: rgba(127, 127, 127, 0.06);
+
+    // Unlike the original rotating headings, keep labels and links readable.
+    > h2 {
+      position: static;
+      display: block;
+      width: auto;
+      height: auto;
+      margin: 0 0 0.75rem;
+      padding: 0 0 0.35rem;
+      transform: none;
+      border-bottom: 1px solid rgba(127, 127, 127, 0.25);
+    }
+
+    .vertical-section {
+      display: flex;
+      flex-flow: row wrap;
+      align-items: flex-start;
+      gap: 0.75rem;
+      min-width: 0;
+      height: auto;
+      margin: 0;
+    }
+
+    h4 {
+      position: static;
+      margin: 0.25rem 0;
+    }
+  }
+
+  .about-section .about-piece {
+    min-width: 0;
+    margin-right: 1rem;
+
+    &:last-child {
+      margin-right: 0;
+    }
+  }
+
+  @media (max-width: 720px) {
+    .user-favorites,
+    .user-uploads {
+      padding: 0.6rem;
+    }
+
+    .user-favorites .vertical-section,
+    .user-uploads .vertical-section {
+      gap: 0.5rem;
+    }
+  }
+}
