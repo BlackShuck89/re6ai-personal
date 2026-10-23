@@ -47,7 +47,7 @@ switch (mode) {
       "./build/userscript/altver.meta.js",
       metaBody
         .replace(/\/\/ @connect +\*[\n\r]/g, "")
-        .replace(/download\/script\./g, "download/altver."),
+        .replace(/\/script\.(meta\.js|user\.js)/g, "/altver.$1"),
     );
   }
   default: {
@@ -63,7 +63,7 @@ switch (mode) {
       scriptBody
         .replace(/"%PRIVACY%"/g, true)
         .replace(/\/\/ @connect +\*[\n\r]/g, "")
-        .replace(/download\/script\./g, "download/altver."),
+        .replace(/\/script\.(meta\.js|user\.js)/g, "/altver.$1"),
     );
   }
 }
