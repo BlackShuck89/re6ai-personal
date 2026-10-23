@@ -43,7 +43,16 @@ export class DownloadCustomizer extends RE6Module {
 
     this.post = Post.getViewingPost();
 
-    const downloadContainer = $(".ptbr-etc-menu");
+    // Danbooru themes can relocate the post toolbar between releases.
+    // Use the established action container first; keep other known menus as fallbacks.
+    let downloadContainer = $(".ptbr-etc-menu").first();
+    if (!downloadContainer.length) downloadContainer = $("#image-download-link").parent().first();
+    if (!downloadContainer.length) downloadContainer = $("#post-options").first();
+    if (!downloadContainer.length) {
+      console.warn("re6AI Personal: no supported post download toolbar found");
+      return;
+    }
+    if (downloadContainer.find("#image-custom-download-file").length) return;
 
     downloadContainer.find(".ptbr-etc-download").hide();
 
@@ -103,7 +112,8 @@ export class DownloadCustomizer extends RE6Module {
   }
 
   private hotkeyDownload (): void {
-    $("#image-custom-download-file")[0].click();
+    const link = $("#image-custom-download-file")[0] as HTMLElement;
+    if (link) link.click();
   }
 
   /**
