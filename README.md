@@ -1,47 +1,40 @@
-<div>
-  <h1>re6ai</h1>
-  <div>
-    <a href="https://github.com/re621/re6ai/releases">
-      <img src="https://img.shields.io/github/v/release/re621/re6ai?label=version&style=flat-square" alt="Releases">
-    </a>
-    <a href="https://github.com/re621/re6ai/issues">
-      <img src="https://img.shields.io/github/issues/re621/re6ai?style=flat-square" alt="Issues">
-    </a>
-    <a href="https://github.com/re621/re6ai/pulls">
-      <img src="https://img.shields.io/github/issues-pr/re621/re6ai?style=flat-square" alt="Pull Requests">
-    </a>
-    <a href="https://github.com/re621/re6ai/releases/latest/download/script.user.js">
-      <img src="https://img.shields.io/github/downloads/re621/re6ai/total?style=flat-square" alt="Download">
-    </a>
-  </div>
-</div>
+# re6AI Personal
 
-RE6ai is a comprehensive project created to improve the basic user experience while browsing e6ai.net.  
-It consists of several different modules that enhance the entire site, top to bottom - literally.
+An independently maintained fork of [re6AI](https://github.com/re621/re6ai), adapted from the original [re621](https://github.com/re621/re621) project for [e6ai.net](https://e6ai.net).
+
+This is **not an official upstream release**. Original author and contributor credits are retained in `package.json`; the source is licensed under GPLv3 (see [LICENSE](LICENSE)).
+
+## Status
+
+Development is taking place on the [development branch](https://github.com/BlackShuck89/re6ai-personal/tree/development). The fork has not yet been validated end-to-end on a live e6AI session. Do not install the upstream re6AI userscript at the same time.
 
 ## Installation
 
-The project is delivered via a userscript. This means that you need a script manager, such as [Tampermonkey](https://tampermonkey.net/).  
-With a script manager installed, click on the following link and follow the instructions on the new page.
+After a release is published, install the userscript using [Tampermonkey](https://tampermonkey.net/) or [Violentmonkey](https://violentmonkey.github.io/):
 
-<a href="https://github.com/re621/re6ai/releases/latest/download/script.user.js">
-  <img src="https://img.shields.io/github/v/release/re621/re6ai?label=Install&style=for-the-badge">
-</a>
+[Latest fork release](https://github.com/BlackShuck89/re6ai-personal/releases/latest)
 
-## Features
+The userscript's update and download metadata points to **this fork**, not the original repository. No downloadable release has been published yet.
 
-For a complete feature overview visit the projects website, found under [re621.app](https://re621.app/)
+## Building locally
 
-## Contributing
+Install [Bun](https://bun.sh/), then run:
 
-Contributions are always welcome.  
-For bug reports, suggestions, and feature requests, head on over to the [issue tracker](https://github.com/re621/re6ai/issues).
+```sh
+bun install --frozen-lockfile
+bun run compile-typescript:prod
+bun run compile-sass:prod
+bun run compose-userscript:prod
+```
 
-## Building the Script
+The userscript should be generated at `build/userscript/script.user.js`. The older extension build is preserved for reference but is not a supported release target yet.
 
-Start by cloning the repo as normal.  
-Run `bun i` to install dependencies, then run `bun run build:prod` to start the build process.
+## Development priorities
 
-Build artifacts are placed in the `/build/` folder. This process produces both the userscript and the extension version.
+- Resolve tag subscription buttons and download toolbar regressions.
+- Update remaining re621 labels to e6AI terminology.
+- Compare with re621 2.x and port compatible functionality incrementally.
+- Add browser smoke tests and verify e6AI API rate-limit compliance.
+- Review settings migration and check for regressions before merging into `master`.
 
-For development purposes, you may also wish to create an injector userscript by running `bun run injector:chrome` or `bun run injector:firefox`, which references the local file, removing the need to reload the script. Note that the firefox version requires running a [TamperDAV server](https://github.com/Tampermonkey/tamperdav).
+Please report issues in [this fork's issue tracker](https://github.com/BlackShuck89/re6ai-personal/issues). For original project information, see [upstream re6AI](https://github.com/re621/re6ai).
