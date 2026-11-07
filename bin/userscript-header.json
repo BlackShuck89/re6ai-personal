@@ -9,10 +9,10 @@
     "homepageURL": "%HOMEPAGE%",
     "contributionURL": "https://ko-fi.com/bitwolfy",
     "match": [
-        "https://e6ai.net/*"
+        "https://blep.art/*"
     ],
-    "updateURL": "%GITHUB%/releases/download/v1.1.0-beta.1/script.meta.js",
-    "downloadURL": "%GITHUB%/releases/download/v1.1.0-beta.1/script.user.js",
+    "updateURL": "%GITHUB%/releases/download/v1.2.0-beta.1/script.meta.js",
+    "downloadURL": "%GITHUB%/releases/download/v1.2.0-beta.1/script.user.js",
     "require": [
         "https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js",
         "https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js",
@@ -40,7 +40,8 @@
     "icon64": "https://cdn.jsdelivr.net/gh/BlackShuck89/re6ai-personal@master/assets/icon64.png",
     "connect": [
         "api.github.com",
-        "static1.e6ai.net",
+        "blep.art",
+        "*.blep.art",
         "re621.app",
         "*"
     ],
