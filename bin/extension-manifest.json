@@ -9,17 +9,17 @@
     "icons-lib": [
         {
             "size": "32",
-            "url": "https://cdn.jsdelivr.net/gh/re621/re6ai@master/assets/icon32.png",
+            "url": "https://cdn.jsdelivr.net/gh/BlackShuck89/re6ai-personal@master/assets/icon32.png",
             "path": "./build/cache/icon32.png"
         },
         {
             "size": "64",
-            "url": "https://cdn.jsdelivr.net/gh/re621/re6ai@master/assets/icon64.png",
+            "url": "https://cdn.jsdelivr.net/gh/BlackShuck89/re6ai-personal@master/assets/icon64.png",
             "path": "./build/cache/icon64.png"
         },
         {
             "size": "129",
-            "url": "https://cdn.jsdelivr.net/gh/re621/re6ai@master/assets/icon128.png",
+            "url": "https://cdn.jsdelivr.net/gh/BlackShuck89/re6ai-personal@master/assets/icon128.png",
             "path": "./build/cache/icon128.png"
         }
     ],
@@ -32,7 +32,7 @@
     "content_scripts": [
         {
             "matches": [
-                "https://e6ai.net/*"
+                "https://blep.art/*"
             ],
             "css": [],
             "js": [],
@@ -61,8 +61,9 @@
         "tabs",
         "downloads",
         "https://api.github.com/*",
-        "https://static1.e6ai.net/*",
-        "https://re621.app/*"
+        "https://re621.app/*",
+        "https://blep.art/*",
+        "https://*.blep.art/*"
     ],
     "resources": {
         "re621_css": "style.min.css"
