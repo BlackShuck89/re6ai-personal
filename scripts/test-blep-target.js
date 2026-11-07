@@ -27,5 +27,15 @@ assert.match(api, /query\["_client"\]\s*=\s*window\["re621"\]\["useragent"\]/);
 assert.match(api, /requestRateLimit\s*=\s*1000\s*;/);
 assert.match(api, /delay\s*<\s*E621\.requestRateLimit/);
 assert(!post.includes("static1.e6ai.net"), "Preview generation must not use the retired CDN");
+for (const tracker of ["TagTracker", "PoolTracker", "CommentTracker"]) {
+  const source = read(`src/js/modules/subscriptions/${tracker}.ts`);
+  assert(!source.includes("e6ai.net"), `${tracker} must not link to the retired site`);
+  assert(!source.includes("static1.e6ai.net"), `${tracker} must not use the retired CDN`);
+  assert.match(source, /PostData\.createPreviewUrlFromMd5/);
+  assert.match(source, /PostData\.createSampleUrlFromMd5/);
+}
+assert(!read("src/js/modules/search/BetterSearch.ts").includes("https://e6ai.net"),
+  "Post history must stay on blep.art");
+
 
 console.log("blep.art domain, identity, and API guard checks passed");
