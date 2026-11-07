@@ -813,10 +813,24 @@ export namespace PostData {
    * @param md5 MD5 hash
    */
   export function createPreviewUrlFromMd5 (md5: string): string {
-    // Assume that the post is flash when no md5 is passed
-    return md5 == ""
-      ? "https://static1.e6ai.net/images/download-preview.png"
-      : `https://static1.e6ai.net/data/preview/${md5.substring(0, 2)}/${md5.substring(2, 4)}/${md5}.jpg`;
+    // Prefer the media origin already used by blep.art's own thumbnails.
+    // Blep may host media separately from the website; do not keep e6AI's
+    // hard-coded static1.e6ai.net CDN address.
+    const $example = $("article.post-preview img[src*='/data/preview/'], article.post-preview img[data-src*='/data/preview/']").first();
+    const exampleURL = $example.attr("data-src") || $example.attr("src") || "";
+    let mediaOrigin = window.location.origin;
+    if (exampleURL) {
+      try {
+        const candidate = new URL(exampleURL, window.location.origin);
+        if (candidate.hostname === "blep.art" || candidate.hostname.endsWith(".blep.art"))
+          mediaOrigin = candidate.origin;
+      } catch {
+        // If the DOM has no usable preview, fall back to the current host.
+      }
+    }
+    return md5 === ""
+      ? window.location.origin + "/images/download-preview.png"
+      : `${mediaOrigin}/data/preview/${md5.substring(0, 2)}/${md5.substring(2, 4)}/${md5}.jpg`;
   }
 }
 
