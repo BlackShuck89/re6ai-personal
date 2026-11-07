@@ -815,7 +815,7 @@ export namespace PostData {
   export function createPreviewUrlFromMd5 (md5: string): string {
     // Prefer the media origin already used by blep.art's own thumbnails.
     // Blep may host media separately from the website; do not keep e6AI's
-    // hard-coded static1.e6ai.net CDN address.
+    // hard-coded CDN address of the retired site.
     const $example = $("article.post-preview img[src*='/data/preview/'], article.post-preview img[data-src*='/data/preview/']").first();
     const exampleURL = $example.attr("data-src") || $example.attr("src") || "";
     let mediaOrigin = window.location.origin;
