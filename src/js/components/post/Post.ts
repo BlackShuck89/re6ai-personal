@@ -809,29 +809,55 @@ export namespace PostData {
   }
 
   /**
-   * Creates a thumbnail preview from an MD5 hash
-   * @param md5 MD5 hash
+   * Discovers the media origin from a thumbnail already supplied by blep.art.
+   * Avoids baking in a fixed host that could change during site migration.
    */
-  export function createPreviewUrlFromMd5 (md5: string): string {
-    // Prefer the media origin already used by blep.art's own thumbnails.
-    // Blep may host media separately from the website; do not keep e6AI's
-    // hard-coded CDN address of the retired site.
-    const $example = $("article.post-preview img[src*='/data/preview/'], article.post-preview img[data-src*='/data/preview/']").first();
-    const exampleURL = $example.attr("data-src") || $example.attr("src") || "";
-    let mediaOrigin = window.location.origin;
-    if (exampleURL) {
-      try {
-        const candidate = new URL(exampleURL, window.location.origin);
-        if (candidate.hostname === "blep.art" || candidate.hostname.endsWith(".blep.art"))
-          mediaOrigin = candidate.origin;
-      } catch {
-        // If the DOM has no usable preview, fall back to the current host.
+  export function getMediaOrigin (): string {
+    const previews = document.querySelectorAll<HTMLImageElement>(
+      "article.post-preview img, img[data-preview-url], img[data-sample-url]",
+    );
+    for (const img of Array.from(previews)) {
+      const candidates = [
+        img.getAttribute("data-preview-url"),
+        img.getAttribute("data-sample-url"),
+        img.getAttribute("data-src"),
+        img.currentSrc,
+        img.src,
+      ];
+      for (const source of candidates) {
+        if (!source || !source.includes("/data/")) continue;
+        try {
+          const url = new URL(source, window.location.origin);
+          if (url.protocol !== "https:") continue;
+          if (url.hostname === "blep.art" || url.hostname.endsWith(".blep.art"))
+            return url.origin;
+        } catch {
+          // Ignore a malformed image URL.
+        }
       }
     }
-    return md5 === ""
-      ? window.location.origin + "/images/download-preview.png"
-      : `${mediaOrigin}/data/preview/${md5.substring(0, 2)}/${md5.substring(2, 4)}/${md5}.jpg`;
+    return window.location.origin;
   }
+
+  /** Fallback image when a post no longer has a preview. */
+  export function getDeletedPreviewUrl (): string {
+    return window.location.origin + "/images/deleted-preview.png";
+  }
+
+  /** Create a thumbnail preview from an MD5 hash where JSON preview.url is unavailable. */
+  export function createPreviewUrlFromMd5 (md5: string): string {
+    if (!md5) return getDeletedPreviewUrl();
+    return `${getMediaOrigin()}/data/preview/${md5.substring(0, 2)}/${md5.substring(2, 4)}/${md5}.jpg`;
+  }
+
+  /** Construct a sample/original URL when the subscription cache has only MD5 data. */
+  export function createSampleUrlFromMd5 (md5: string, hasSample: boolean, ext = "jpg"): string {
+    if (!md5) return getDeletedPreviewUrl();
+    const path = hasSample ? "data/sample" : "data";
+    const suffix = hasSample ? "jpg" : ext;
+    return `${getMediaOrigin()}/${path}/${md5.substring(0, 2)}/${md5.substring(2, 4)}/${md5}.${suffix}`;
+  }
+
 }
 
 export enum LoadedFileType {
