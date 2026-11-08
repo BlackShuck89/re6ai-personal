@@ -174,51 +174,72 @@ export class XMConnect {
   }
 
   /**
-   * Downloads a given URL to the local disk.
-   * @param details Download details
+   * Download a file with the exact user-defined filename.
+   *
+   * We download into a Blob first because Tampermonkey/browser download modes
+   * can discard the 'name' passed to GM_download and save the URL basename.
+   * A same-origin blob URL with an attached <a download> reliably conveys
+   * the custom filename in Firefox and Chromium.
    */
   public static download (url: string, name: string): void;
   public static download (defaults: GMDownloadDetails): void;
-  public static download (a: any, b?: any): void {
-    if (typeof a === "string") {
-      a = {
-        url: a,
-        name: b,
-      };
+  public static download (a: any, b?: string): void {
+    const details: GMDownloadDetails = typeof a === "string"
+      ? { url: a, name: b }
+      : a;
+
+    if (!details.url || !details.name) {
+      console.error("re6AI Personal: download URL or filename is missing", details);
+      return;
     }
 
-    if (a.headers === undefined) a.headers = {
-      "User-Agent": window["re621"]["useragent"],
-      "X-User-Agent": window["re621"]["useragent"],
+    const onError = (event: GMxmlHttpRequestEvent): void => {
+      if (details.onerror) details.onerror(event as GMxmlHttpRequestError);
+      else console.error("re6AI Personal: download failed", event);
     };
 
-    if (a.onerror === undefined) a.onerror = (): void => { return; };
-    if (a.onload === undefined) a.onload = (): void => { return; };
-    if (a.onprogress === undefined) a.onprogress = (): void => { return; };
-    if (a.ontimeout === undefined) a.ontimeout = (): void => { return; };
-
-    let timer: number;
     XMConnect.xmlHttpRequest({
-      url: a.url,
+      url: details.url,
       method: "GET",
-      headers: a.headers,
       responseType: "blob",
-      onerror: (event) => { a.onerror(event); },
-      ontimeout: (event) => { a.ontimeout(event); },
-      onprogress: (event) => {
-        if (timer) clearTimeout(timer);
-        timer = window.setTimeout(() => { a.onprogress(event); }, 500);
-      },
+      onerror: onError,
+      ontimeout: onError,
+      onprogress: (event) => { if (details.onprogress) details.onprogress(event); },
       onload: (event) => {
-        a.onload(event);
-        const btn = $("<a>")
-          .attr({
-            href: URL.createObjectURL(event.response as Blob),
-            download: a.name,
-          })
-          .html("download")
-          .on("click", () => { btn.remove(); });
-        btn[0].click();
+        if (event.status < 200 || event.status >= 300 || !event.response) {
+          onError(event);
+          return;
+        }
+
+        const blob = event.response instanceof Blob
+          ? event.response
+          : new Blob([event.response]);
+        if (!blob.size) {
+          onError(event);
+          return;
+        }
+
+        const objectUrl = URL.createObjectURL(blob);
+        const anchor = document.createElement("a");
+        anchor.href = objectUrl;
+        anchor.download = details.name;
+        anchor.style.display = "none";
+
+        // Firefox may ignore clicks on detached anchors; append before click.
+        (document.body || document.documentElement).appendChild(anchor);
+        try {
+          anchor.click();
+          if (details.onload) details.onload(event);
+        } catch (error) {
+          console.error("re6AI Personal: unable to start browser download", error);
+          onError(event);
+        } finally {
+          // Keep the object URL alive until the browser has consumed the click.
+          window.setTimeout(() => {
+            anchor.remove();
+            URL.revokeObjectURL(objectUrl);
+          }, 30000);
+        }
       },
     });
   }
