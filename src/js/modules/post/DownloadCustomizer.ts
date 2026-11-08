@@ -40,7 +40,7 @@ export class DownloadCustomizer extends RE6Module {
   public create (): void {
     super.create();
 
-    // IMPORTANT: Do not call Post.getViewingPost() during initialization.
+    // IMPORTANT: Do not parse full post metadata during initialization.
     // Some blep.art pages expose different embedded post data. A thrown parse
     // error previously prevented the handler from ever being installed.
     // Resolve post metadata lazily, only when the user requests a download.
