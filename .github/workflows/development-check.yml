@@ -43,7 +43,7 @@ jobs:
           grep -Fq "releases/download/$GIT_TAG_NAME/script.meta.js" build/userscript/script.user.js
           grep -Fq "releases/download/$GIT_TAG_NAME/script.user.js" build/userscript/script.user.js
           grep -Fq "blep.art/*" build/userscript/script.meta.js
-          grep -Fq "1.2.0-beta.5" build/userscript/script.meta.js
+          grep -Fq "1.2.0-beta.6" build/userscript/script.meta.js
           ! grep -Fq "@match          https://e6ai.net" build/userscript/script.meta.js
       - name: Upload test artifact
         uses: actions/upload-artifact@v4
