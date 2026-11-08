@@ -7,6 +7,7 @@
 import { Danbooru } from "./components/api/Danbooru";
 import { Page, PageDefinition } from "./components/data/Page";
 import { User } from "./components/data/User";
+import { Post } from "./components/post/Post";
 import { ModuleController } from "./components/ModuleController";
 import { CleanSlate } from "./components/structure/CleanSlate";
 import { StartupTasks } from "./components/structure/StartupTasks";
@@ -126,6 +127,10 @@ CleanSlate.createDOM().then(async () => {
   await AvoidPosting.init();
 
   User.init();
+
+  // Populate individual post data before synchronous modules request it.
+  // If blep.art lacks the old encoded #post-data structure, use its JSON API.
+  await Post.prepareViewingPostData();
 
   // Subscriptions have to be registered before the SubscriptionManager
   await ModuleController.register(subscriptions);

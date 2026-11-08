@@ -429,8 +429,13 @@ export class Miscellaneous extends RE6Module {
   }
 
   private addRemoveFromSetButton (): void {
+    // A post with no set-navigation links does not need to load post data.
+    // This also avoids throwing when a page does not expose legacy metadata.
+    const links = $("div.set-nav span.set-name a");
+    if (links.length === 0) return;
+
     const post = Post.getViewingPost();
-    for (const link of $("div.set-nav span.set-name a").get()) {
+    for (const link of links.get()) {
       const $link = $(link),
         id = parseInt($link.attr("href").replace("/post_sets/", ""));
 
