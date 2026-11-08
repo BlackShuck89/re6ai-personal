@@ -1,5 +1,5 @@
 /**
- * Re6ai - e6ai Reimagined
+ * reBlep Personal — blep.art Reimagined
  * Script root. Better keep this place tidy.
  */
 
