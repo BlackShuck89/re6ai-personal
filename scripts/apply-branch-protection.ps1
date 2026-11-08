@@ -1,7 +1,7 @@
 # Apply the two tracked GitHub rulesets to this fork using your own GitHub CLI login.
 # GitHub requires repository Administration permission to create rulesets.
 param(
-    [string]$Repository = "BlackShuck89/re6ai-personal"
+    [string]$Repository = "BlackShuck89/reblep"
 )
 $ErrorActionPreference = "Stop"
 
