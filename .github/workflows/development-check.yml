@@ -21,7 +21,7 @@ jobs:
       - name: Check blep.art targeting and API request policy
         run: node scripts/test-blep-target.js
       - name: Exercise real blep.art API response fixtures
-        run: bun run scripts/test-blep-api-fixture.ts
+        run: bun run scripts/test-blep-api-fixture.mjs
       - name: Typecheck and lint
         run: |
           bun run eslint
