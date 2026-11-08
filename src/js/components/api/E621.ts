@@ -4,6 +4,7 @@
 import { Debug } from "../utility/Debug";
 import { Util } from "../utility/Util";
 import { APIResponse } from "./responses/APIResponse";
+import { unwrapResponse } from "./responses/ResponseUnwrap";
 
 // All endpoints must be registered here.
 // Name is irrelevant, as long as it is unique.
@@ -202,10 +203,11 @@ class APIEndpoint {
    * @param hasParam Whether or not the endpoint had a parameter
    */
   private formatData<T extends APIResponse>(data: any, node: string): T[] {
-    if (node !== undefined) data = data[node];
-
-    if (Array.isArray(data)) return data as T[];
-    else return [data as T];
+    // Current blep.art endpoints normally return { posts: [...] } or
+    // { post: {...} }, but some Danbooru versions return the value directly.
+    // In the latter case, blindly reading data[node] yielded [undefined],
+    // which crashed search rendering and lazy post downloads.
+    return unwrapResponse<T>(data, node);
   }
 
 }
