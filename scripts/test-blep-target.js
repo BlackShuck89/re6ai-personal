@@ -55,4 +55,33 @@ assert(!read("src/js/modules/search/BetterSearch.ts").includes("https://e6ai.net
   "Post history must stay on blep.art");
 
 
-console.log("blep.art domain, identity, and API guard checks passed");
+
+// Filename regression guards: post and search downloads must preserve the
+// configured filename rather than allowing GM_download to use the CDN basename.
+const connect = read("src/js/components/api/XMConnect.ts");
+const customizer = read("src/js/modules/post/DownloadCustomizer.ts");
+const search = read("src/js/modules/search/BetterSearch.ts");
+const massDownloader = read("src/js/modules/downloader/MassDownloader.ts");
+const settings = read("src/js/modules/general/SettingsController.ts");
+assert(connect.includes("anchor.download = details.name;"),
+  "Blob download anchor must use the configured filename");
+assert(connect.includes("(document.body || document.documentElement).appendChild(anchor);"),
+  "Firefox requires an attached download anchor");
+assert(connect.includes("URL.revokeObjectURL(objectUrl);"),
+  "Blob download URL must be cleaned up");
+assert(customizer.includes("XM.Connect.download({"),
+  "Individual post downloads should preserve the configured filename");
+assert(!customizer.includes("XM.Connect.browserDownload("),
+  "Individual post downloads must not use the filename-ignoring path");
+assert(customizer.includes("this.getDownloadFileName()"),
+  "Post download links should be refreshed from the current settings");
+assert(search.includes("XM.Connect.download({"),
+  "Search-mode downloads should use the filename-preserving path");
+assert(search.includes("DownloadCustomizer.getFileName(post)"),
+  "Search-mode downloads should use the configured name format");
+assert(massDownloader.includes("const trimmedArtists = new Set(post.tags.director);"),
+  "Filename creation must not mutate the post's tag data");
+assert(settings.includes("confirm or edit the generated filename"),
+  "Download confirmation text must describe its actual behavior");
+
+console.log("blep.art domain, API, startup, and download filename guard checks passed");
