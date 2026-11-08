@@ -710,10 +710,16 @@ export class BetterSearch extends RE6Module {
           break;
         }
         case "download": {
-          XM.Connect.browserDownload({
+          const name = DownloadCustomizer.confirmFilename(DownloadCustomizer.getFileName(post));
+          if (name === null) break;
+          // Use the same reliable filename-preserving path as post pages.
+          XM.Connect.download({
             url: post.file.original,
-            name: DownloadCustomizer.getFileName(post),
-            saveAs: ModuleController.fetchSettings<boolean>(DownloadCustomizer, "confirmDownload"),
+            name: name,
+            onerror: (error) => {
+              Danbooru.error("Unable to download this file. See the browser console for details.");
+              console.error("re6AI Personal: search download failed", error);
+            },
           });
           break;
         }
