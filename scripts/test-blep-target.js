@@ -14,14 +14,14 @@ const extension = JSON.parse(read("bin/extension-manifest.json"));
 const api = read("src/js/components/api/E621.ts");
 const post = read("src/js/components/post/Post.ts");
 
-assert.equal(pkg.version, "1.2.0-beta.6");
+assert.equal(pkg.version, "1.2.0-beta.7");
 assert.match(pkg.displayName, /blep\.art/);
 assert.match(pkg.namespace, /\/blep\.art$/);
 assert.deepEqual(meta.match, ["https://blep.art/*"]);
 assert(meta.connect.includes("blep.art"), "Blep API origin must be permitted");
 assert(!meta.connect.includes("static1.e6ai.net"), "Old media origin must not be required");
-assert.match(meta.updateURL, /v1\.2\.0-beta\.6/);
-assert.match(meta.downloadURL, /v1\.2\.0-beta\.6/);
+assert.match(meta.updateURL, /v1\.2\.0-beta\.7/);
+assert.match(meta.downloadURL, /v1\.2\.0-beta\.7/);
 assert(extension.content_scripts.some((c) => c.matches.includes("https://blep.art/*")));
 assert.match(api, /query\["_client"\]\s*=\s*window\["re621"\]\["useragent"\]/);
 assert.match(api, /requestRateLimit\s*=\s*1000\s*;/);
