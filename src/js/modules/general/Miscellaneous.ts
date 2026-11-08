@@ -139,7 +139,7 @@ export class Miscellaneous extends RE6Module {
             if (!data || !data.id) return;
             post = PostData.fromAPI(data, "0");
           } catch (apiError) {
-            console.warn("reBlep Personal: could not prepare Reupload shortcut", domError, apiError);
+            console.warn("reBlep: could not prepare Reupload shortcut", domError, apiError);
             return;
           }
         }
