@@ -1,4 +1,4 @@
-// e6ai API Endpoint Wrapper
+// Danbooru-compatible API endpoint wrapper (blep.art)
 // Version 2.1
 
 import { Debug } from "../utility/Debug";
@@ -7,8 +7,8 @@ import { APIResponse } from "./responses/APIResponse";
 
 // All endpoints must be registered here.
 // Name is irrelevant, as long as it is unique.
-// Path is the endpoint address, without https://e6ai.net/
-// Don't forget to update the name in the e6ai aliases below
+// Path is relative to the current blep.art origin.
+// Keep endpoint names synchronized with the aliases below.
 const ENDPOINT_DEFS: EndpointDefinition[] = [
   { name: "posts", path: "posts.json", node: "posts" },
   { name: "post", path: "posts/%ID%.json", node: "post" },
@@ -325,7 +325,7 @@ export class E621 {
    */
   public async createRequest (path: string, query: FormattedAPIQuery, method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE", requestBody: FormattedAPIQuery, endpoint: string, node: string, delay: number): Promise<any> {
     if (delay === undefined) delay = E621.requestRateLimit;
-    else if (delay < 500) delay = 500;
+    else if (delay < E621.requestRateLimit) delay = E621.requestRateLimit;
 
     const requestInfo: RequestInit = {
       credentials: "include",

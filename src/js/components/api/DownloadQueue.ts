@@ -88,7 +88,7 @@ export class DownloadQueue {
       return this.zip.generateAsync({
         type: "blob",
         compression: "STORE",
-        comment: "Downloaded from e6ai on " + new Date().toUTCString(),
+        comment: "Downloaded from blep.art on " + new Date().toUTCString(),
       }, onArchiveProgress);
     });
   }
@@ -198,7 +198,7 @@ interface FileData {
   /**
    * **path** Absolute path where the file can be found.
    * Note that the domain has to be listed in the @connect tag in the header.
-   * ex. https://static1.e6ai.net/data/c5/23/c5237c0c40c22af4c4871c38954cc6ac.jpg
+   * ex. https://<media-host>.blep.art/data/c5/23/c5237c0c40c22af4c4871c38954cc6ac.jpg
    */
   path: string;
 

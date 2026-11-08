@@ -809,15 +809,55 @@ export namespace PostData {
   }
 
   /**
-   * Creates a thumbnail preview from an MD5 hash
-   * @param md5 MD5 hash
+   * Discovers the media origin from a thumbnail already supplied by blep.art.
+   * Avoids baking in a fixed host that could change during site migration.
    */
-  export function createPreviewUrlFromMd5 (md5: string): string {
-    // Assume that the post is flash when no md5 is passed
-    return md5 == ""
-      ? "https://static1.e6ai.net/images/download-preview.png"
-      : `https://static1.e6ai.net/data/preview/${md5.substring(0, 2)}/${md5.substring(2, 4)}/${md5}.jpg`;
+  export function getMediaOrigin (): string {
+    const previews = document.querySelectorAll<HTMLImageElement>(
+      "article.post-preview img, img[data-preview-url], img[data-sample-url]",
+    );
+    for (const img of Array.from(previews)) {
+      const candidates = [
+        img.getAttribute("data-preview-url"),
+        img.getAttribute("data-sample-url"),
+        img.getAttribute("data-src"),
+        img.currentSrc,
+        img.src,
+      ];
+      for (const source of candidates) {
+        if (!source || !source.includes("/data/")) continue;
+        try {
+          const url = new URL(source, window.location.origin);
+          if (url.protocol !== "https:") continue;
+          if (url.hostname === "blep.art" || url.hostname.endsWith(".blep.art"))
+            return url.origin;
+        } catch {
+          // Ignore a malformed image URL.
+        }
+      }
+    }
+    return window.location.origin;
   }
+
+  /** Fallback image when a post no longer has a preview. */
+  export function getDeletedPreviewUrl (): string {
+    return window.location.origin + "/images/deleted-preview.png";
+  }
+
+  /** Create a thumbnail preview from an MD5 hash where JSON preview.url is unavailable. */
+  export function createPreviewUrlFromMd5 (md5: string): string {
+    if (!md5) return getDeletedPreviewUrl();
+    return `${getMediaOrigin()}/data/preview/${md5.substring(0, 2)}/${md5.substring(2, 4)}/${md5}.jpg`;
+  }
+
+  /** Construct a sample/original URL when the subscription cache has only MD5 data. */
+  export function createSampleUrlFromMd5 (md5: string, hasSample: boolean, ext = "jpg"): string {
+    if (!md5) return getDeletedPreviewUrl();
+    const path = hasSample ? "data/sample" : "data";
+    const suffix = hasSample ? "jpg" : ext;
+    return `${getMediaOrigin()}/${path}/${md5.substring(0, 2)}/${md5.substring(2, 4)}/${md5}.${suffix}`;
+  }
+
 }
 
 export enum LoadedFileType {

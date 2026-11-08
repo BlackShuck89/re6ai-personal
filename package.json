@@ -1,9 +1,9 @@
 {
   "name": "re6ai-personal",
-  "displayName": "re6AI Personal - e6AI Reimagined",
-  "namespace": "https://github.com/BlackShuck89/re6ai-personal",
-  "version": "1.1.0-beta.1",
-  "description": "Independently maintained e6AI enhancements, based on re6AI and re621",
+  "displayName": "re6AI Personal — blep.art",
+  "namespace": "https://github.com/BlackShuck89/re6ai-personal/blep.art",
+  "version": "1.2.0-beta.1",
+  "description": "Independently maintained enhancement userscript for blep.art, adapted from re6AI/re621",
   "author": "bitWolfy",
   "contributors": [
     "bitWolfy",

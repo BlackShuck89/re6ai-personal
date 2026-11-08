@@ -78,10 +78,10 @@ export class Page {
 
   /**
    * Returns the name of the current site
-   * @returns e621 or e926
+   * @returns the site's short name (e.g. blep)
    */
   public static getSiteName (): string {
-    return this.getInstance().url.hostname.replace(/\.net/g, "");
+    return this.getInstance().url.hostname.split(".")[0];
   }
 
   /**

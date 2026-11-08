@@ -151,8 +151,8 @@ export class CommentTracker extends SubscriptionTracker {
         // Necessary data for the HoverZoom
         "data-id": data.uid,
         "data-md5": imageData[0],
-        "data-preview-url": getPreviewLink(imageData[0]),
-        "data-sample-url": getSampleLink(imageData[0], imageData[1] == "true", imageData[2]),
+        "data-preview-url": PostData.createPreviewUrlFromMd5(imageData[0]),
+        "data-sample-url": PostData.createSampleUrlFromMd5(imageData[0], imageData[1] == "true", imageData[2]),
         "data-file-ext": imageData[2],
         "data-rating": imageData[3] || "e",
         "data-created-at": new Date(timestamp).toString(),
@@ -176,16 +176,16 @@ export class CommentTracker extends SubscriptionTracker {
 
         const image = $("<img>")
           .attr({
-            src: getPreviewLink(imageData[0]),
+            src: PostData.createPreviewUrlFromMd5(imageData[0]),
             hztarget: "subitem",
           })
           .one("load", () => {
             // This is a workaround to avoid empty thumbnails
             // The preview gets loaded first, then a sample replaces it if necessary
-            if (this.loadLargeThumbs) image.attr("src", getSampleLink(imageData[0], imageData[1] == "true", imageData[2]));
+            if (this.loadLargeThumbs) image.attr("src", PostData.createSampleUrlFromMd5(imageData[0], imageData[1] == "true", imageData[2]));
           })
           .one("error", () => {
-            image.attr("src", "https://e6ai.net/images/deleted-preview.png");
+            image.attr("src", PostData.getDeletedPreviewUrl());
             this.slist.deleteExtraData(commentData[1]);
             this.slist.pushSubscriptions();
           })
@@ -225,17 +225,7 @@ export class CommentTracker extends SubscriptionTracker {
 
     return result;
 
-    function getPreviewLink (md5: string): string {
-      if (!md5) return "https://e6ai.net/images/deleted-preview.png";
-      return `https://static1.e6ai.net/data/preview/${md5.substr(0, 2)}/${md5.substr(2, 2)}/${md5}.jpg`;
-    }
 
-    function getSampleLink (md5: string, hasSample: boolean, ext = "jpg"): string {
-      if (!md5) return "https://e6ai.net/images/deleted-preview.png";
-      return hasSample
-        ? `https://static1.e6ai.net/data/sample/${md5.substr(0, 2)}/${md5.substr(2, 2)}/${md5}.jpg`
-        : `https://static1.e6ai.net/data/${md5.substr(0, 2)}/${md5.substr(2, 2)}/${md5}.${ext}`;
-    }
   }
 
   protected formatSubscriptionListEntry (id: string, value: any, unsub: (name: string) => void): JQuery<HTMLElement> {
