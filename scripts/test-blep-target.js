@@ -118,4 +118,48 @@ assert(massDownloader.includes("const trimmedArtists = new Set(post.tags.directo
 assert(settings.includes("confirm or edit the generated filename"),
   "Download confirmation text must describe its actual behavior");
 
-console.log("blep.art domain, API, startup, and download filename guard checks passed");
+
+// Search requests must settle on invalid JSON or timeout, and BetterSearch
+// must restore the original page rather than hiding it under a spinner.
+const viewer = read("src/js/modules/post/PostViewer.ts");
+assert(api.includes("const controller = new AbortController();"),
+  "API requests must have a cancellation/timeout path");
+assert(api.includes("clearTimeout(timeout);"),
+  "API requests must release their timeout and queue entry");
+assert(api.includes("catch (error)"),
+  "API parsing errors must be caught and delivered to callers");
+assert(search.includes("const paginatorParent = paginator.parent();"),
+  "Native paginator must remain recoverable");
+assert(search.includes("paginator.detach();"),
+  "Do not discard native pagination before the API load succeeds");
+assert(search.includes("Promise.race([this.pageResult, requestTimeout])"),
+  "Initial search must not wait indefinitely");
+assert(search.includes('this.$wrapper.removeAttr("loading").removeAttr("infscroll");'),
+  "Search failures must unhide the original results");
+assert(search.includes('this.$wrapper.find("search-loading, search-content, paginator-container").remove();'),
+  "Search failures must remove the broken overlay");
+assert(search.includes("resolve(-1);"),
+  "Fallback must skip the normal success render path");
+assert(search.includes(".finally(() => {"),
+  "Infinite scroll failures must always clear loading state");
+
+// Favoriting should upvote only when configured and should not remove an
+// already present upvote. It must not depend on legacy encoded post metadata.
+assert(viewer.includes("upvoteOnFavorite: true"),
+  "Auto-upvote on favorite must remain enabled by default");
+assert(viewer.includes("this.installFavoriteUpvote();"),
+  "Install favorite observer during initial post module startup");
+assert(viewer.includes('favoriteButton.getAttribute("favorited") !== "true"'),
+  "Never upvote after removing a favorite");
+assert(viewer.includes('voteWrap.getAttribute("data-vote") === "1"'),
+  "Never remove an existing upvote by clicking twice");
+const viewerCreate = viewer.slice(viewer.indexOf("public create (): void"),
+  viewer.indexOf("private installFavoriteUpvote"));
+assert(!viewerCreate.includes("Post.getViewingPost()"),
+  "Favorite observer setup must not depend on metadata that blep can omit");
+assert(search.includes('ModuleController.fetchSettings<boolean>(PostViewer, "upvoteOnFavorite")'),
+  "Search-page favorites must respect the same auto-upvote setting");
+assert(search.includes("PostActions.vote(post.id, 1, true)"),
+  "Search-page auto-upvote must use no_unvote to avoid toggling off");
+
+console.log("blep.art domain, API, search loading, favorite voting, and download filename checks passed");
