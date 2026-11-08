@@ -123,7 +123,7 @@ export class DownloadCustomizer extends RE6Module {
         return;
 
       const link = target.closest<HTMLAnchorElement>(
-        ".ptbr-etc-menu a[href], .ptbr-etc-download a[href], "
+        ".ptbr-etc-menu a[href], .ptbr-etc-download a[href], a[download][href], "
         + "a.ptbr-etc-download[href], #post-options a[href], #image-download-link a[href]",
       );
       if (!link) return;
