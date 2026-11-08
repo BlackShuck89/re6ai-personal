@@ -41,12 +41,33 @@ interface Flags {
   deleted: boolean;
 }
 
-interface Tags {
-  general: string[];
-  species: string[];
-  character: string[];
-  franchise: string[];
+/**
+ * blep.art uses Danbooru's artist/copyright/contributor categories.
+ * The original re6AI build uses director/franchise for related roles.
+ * Accept either response shape and normalize at the API boundary.
+ */
+export interface PostTagGroups {
+  general?: string[];
+  species?: string[];
+  character?: string[];
+  franchise?: string[];
+  director?: string[];
+  artist?: string[];
+  contributor?: string[];
+  copyright?: string[];
+  invalid?: string[];
+  meta?: string[];
+  lore?: string[];
+}
+
+type Tags = PostTagGroups;
+
+export interface NormalizedPostTags {
   director: string[];
+  franchise: string[];
+  character: string[];
+  species: string[];
+  general: string[];
   invalid: string[];
   meta: string[];
   lore: string[];
@@ -170,17 +191,46 @@ export namespace PostRating {
 
 export namespace APIPost {
 
+  /**
+   * Normalize old e6AI categories and blep.art's native Danbooru categories.
+   * In particular, missing director/franchise must not throw when artist and
+   * copyright are present. Deduplicate without mutating the API response.
+   */
+  export function normalizeTags (raw: PostTagGroups | null | undefined): NormalizedPostTags {
+    const groups = raw || {};
+    const get = (...keys: (keyof PostTagGroups)[]): string[] => {
+      const values = keys.reduce<string[]>((out, key) => {
+        const found = groups[key];
+        if (Array.isArray(found)) out.push(...found.filter((tag) => typeof tag === "string"));
+        return out;
+      }, []);
+      return Array.from(new Set(values));
+    };
+
+    return {
+      director: get("director", "artist", "contributor"),
+      franchise: get("franchise", "copyright"),
+      character: get("character"),
+      species: get("species"),
+      general: get("general"),
+      invalid: get("invalid"),
+      meta: get("meta"),
+      lore: get("lore"),
+    };
+  }
+
   export function getTags (post: APIPost): string[] {
-    return [
-      ...post.tags.director,
-      ...post.tags.franchise,
-      ...post.tags.character,
-      ...post.tags.general,
-      ...post.tags.invalid,
-      ...post.tags.meta,
-      ...post.tags.species,
-      ...post.tags.lore,
-    ];
+    const tags = normalizeTags(post.tags);
+    return Array.from(new Set([
+      ...tags.director,
+      ...tags.franchise,
+      ...tags.character,
+      ...tags.general,
+      ...tags.invalid,
+      ...tags.meta,
+      ...tags.species,
+      ...tags.lore,
+    ]));
   }
 
   export function getTagString (post: APIPost): string {

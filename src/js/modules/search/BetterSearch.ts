@@ -13,6 +13,7 @@ import { Debug } from "../../components/utility/Debug";
 import { Icons } from "../../components/utility/Icons";
 import { Util } from "../../components/utility/Util";
 import { DownloadCustomizer } from "../post/DownloadCustomizer";
+import { PostViewer } from "../post/PostViewer";
 import { BlacklistEnhancer } from "./BlacklistEnhancer";
 
 export class BetterSearch extends RE6Module {
@@ -128,9 +129,12 @@ export class BetterSearch extends RE6Module {
     // Scrape the old paginator for data
     // If the API ever starts returning the total number of results, this can be removed
     const paginator = $("#paginator-old, nav.pagination").first();
+    const paginatorParent = paginator.parent();
+    const paginatorNext = paginator.next();
     const curPage = parseInt(paginator.attr("data-current")) || -1,
       lastPage = parseInt(paginator.attr("data-total")) || -1;
-    paginator.remove();
+    // Preserve the native paginator until the enhanced search has succeeded.
+    paginator.detach();
     this.lastPage = Math.max(curPage, lastPage);
 
     // Determine if there are more content pages to show
@@ -219,11 +223,20 @@ export class BetterSearch extends RE6Module {
 
     // Initial post load
     new Promise(async (resolve) => {
-
-      let pagesLoaded = 0;
-
-      const pageResult = await this.pageResult;
-      this.pageResultCount = pageResult.length;
+      try {
+        let pagesLoaded = 0;
+        let timeout: number;
+        const requestTimeout = new Promise<APIPost[]>((_, reject) => {
+          timeout = window.setTimeout(() => reject(new Error("Post search timed out")), 22000);
+        });
+        let pageResult: APIPost[];
+        try {
+          pageResult = await Promise.race([this.pageResult, requestTimeout]);
+        } finally {
+          clearTimeout(timeout);
+        }
+        if (!Array.isArray(pageResult)) throw new Error("Post search returned invalid data");
+        this.pageResultCount = pageResult.length;
 
       // Create the statistics section
       const stats = $("<search-stats>")
@@ -344,8 +357,24 @@ export class BetterSearch extends RE6Module {
         .removeAttr("loading")
         .attr("infscroll", "ready");
 
-      resolve(pagesLoaded);
+        paginator.remove();
+        resolve(pagesLoaded);
+      } catch (error) {
+        console.error("reBlep Personal: enhanced post search failed", error);
+        this.$wrapper.removeAttr("loading").removeAttr("infscroll");
+        this.$wrapper.find("search-loading, search-content, paginator-container").remove();
+        if (paginator.length) {
+          if (paginatorNext.length && paginatorNext.parent().length)
+            paginator.insertBefore(paginatorNext);
+          else if (paginatorParent.length)
+            paginator.appendTo(paginatorParent);
+          else paginator.appendTo(this.$wrapper);
+        }
+        Danbooru.error("Enhanced search failed; showing the original post results.");
+        resolve(-1);
+      }
     }).then((pagesLoaded: number) => {
+      if (pagesLoaded < 0) return;
 
       this.reloadPaginator();
       this.reloadEventListeners();
@@ -710,10 +739,16 @@ export class BetterSearch extends RE6Module {
           break;
         }
         case "download": {
-          XM.Connect.browserDownload({
+          const name = DownloadCustomizer.confirmFilename(DownloadCustomizer.getFileName(post));
+          if (name === null) break;
+          // Use the same reliable filename-preserving path as post pages.
+          XM.Connect.download({
             url: post.file.original,
-            name: DownloadCustomizer.getFileName(post),
-            saveAs: ModuleController.fetchSettings<boolean>(DownloadCustomizer, "confirmDownload"),
+            name: name,
+            onerror: (error) => {
+              Danbooru.error("Unable to download this file. See the browser console for details.");
+              console.error("reBlep Personal: search download failed", error);
+            },
           });
           break;
         }
@@ -774,10 +809,38 @@ export class BetterSearch extends RE6Module {
           break;
         }
         case "add-fav": {
-          // TODO Replace with PostActions
-          E621.Favorites.post({ "post_id": post.id });
-          post.is_favorited = true;
-          post.$ref.attr("fav", "true");
+          // Only mark a post as favorited once the server accepts it.
+          // Keep the same auto-upvote preference as the individual post page.
+          void PostActions.addFavorite(post.id).then(async (added) => {
+            if (!added) {
+              Danbooru.error("Unable to favorite the post.");
+              return;
+            }
+            post.is_favorited = true;
+            post.$ref.attr("fav", "true");
+
+            if (!ModuleController.fetchSettings<boolean>(PostViewer, "upvoteOnFavorite"))
+              return;
+            if (post.user_score === 1 || post.$ref.attr("vote") === "1")
+              return;
+
+            // no_unvote prevents accidentally removing an existing upvote.
+            const vote = await PostActions.vote(post.id, 1, true);
+            if (!vote.success) {
+              Danbooru.error("Favorite added, but automatic upvote failed.");
+              return;
+            }
+            post.user_score = 1;
+            post.$ref.attr("vote", "1");
+            post.score = {
+              up: vote.up || 0,
+              down: vote.down || 0,
+              total: vote.score || 0,
+            };
+            post.$ref.trigger("re621:update");
+          }).catch((error) => {
+            console.error("reBlep Personal: favorite/upvote failed", error);
+          });
           break;
         }
         case "remove-fav": {
@@ -950,11 +1013,18 @@ export class BetterSearch extends RE6Module {
 
             this.loadingPosts = true;
             this.$wrapper.attr("infscroll", "loading");
-            this.loadNextPage().then((result) => {
-              this.hasMorePages = result;
+            this.loadNextPage().then(
+              (result) => {
+                this.hasMorePages = result;
+              },
+              (error) => {
+                console.error("reBlep Personal: loading more posts failed", error);
+                Danbooru.error("Unable to load more posts. Try again.");
+              },
+            ).finally(() => {
               this.$wrapper.attr("infscroll", "ready");
-              this.reloadPaginator();
               this.loadingPosts = false;
+              this.reloadPaginator();
             });
           });
         $("<span>")

@@ -4,7 +4,7 @@ import { APIPost } from "../../components/api/responses/APIPost";
 import { XM } from "../../components/api/XM";
 import { Page, PageDefinition } from "../../components/data/Page";
 import { ModuleController } from "../../components/ModuleController";
-import { Post } from "../../components/post/Post";
+import { Post, PostData } from "../../components/post/Post";
 import { PostActions } from "../../components/post/PostActions";
 import { PostParts } from "../../components/post/PostParts";
 import { RE6Module, Settings } from "../../components/RE6Module";
@@ -125,11 +125,28 @@ export class Miscellaneous extends RE6Module {
     // Add "Upload Superior" button
     $(async () => {
       if (Page.matches(PageDefinition.post)) {
-        const post = Post.getViewingPost();
+        let post: PostData;
+        try {
+          post = Post.getViewingPost();
+        } catch (domError) {
+          // Some blep.art posts do not expose the exact embedded metadata
+          // expected by the legacy parser. Recover only for the Reupload
+          // shortcut, without making the whole userscript wait on an API call.
+          const postID = Number(Page.getPageID());
+          if (!Number.isSafeInteger(postID) || postID <= 0) return;
+          try {
+            const data = await E621.Post.id(postID).first<APIPost>();
+            if (!data || !data.id) return;
+            post = PostData.fromAPI(data, "0");
+          } catch (apiError) {
+            console.warn("reBlep Personal: could not prepare Reupload shortcut", domError, apiError);
+            return;
+          }
+        }
 
-        // This should trim tags that might not be appropriate in the new version
-        // Image ratio tags should also be here... but there are just too many of them
-        const tags = post.tags.all;
+        // Do not mutate the cached post's tag set when building this link.
+        // Image ratio tags should also be here... but there are just too many of them.
+        const tags = new Set(post.tags.all);
         for (const trimmedTag of ["better_version_at_source", "thumbnail", "low_res", "hi_res", "absurd_res", "superabsurd_res", "invalid_tag"])
           tags.delete(trimmedTag);
         const attributes = [];
@@ -434,12 +451,17 @@ export class Miscellaneous extends RE6Module {
     const links = $("div.set-nav span.set-name a");
     if (links.length === 0) return;
 
-    const post = Post.getViewingPost();
-    for (const link of links.get()) {
-      const $link = $(link),
-        id = parseInt($link.attr("href").replace("/post_sets/", ""));
+    // Removing a post from a set requires only its URL ID, not full
+    // post metadata. This avoids the original Miscellaneous/init crash.
+    const postID = Number(Page.getPageID());
+    if (!Number.isSafeInteger(postID) || postID <= 0) return;
 
-      if (!id) continue;
+    for (const link of links.get()) {
+      const $link = $(link);
+      const match = ($link.attr("href") || "").match(new RegExp("/post_sets/([0-9]+)(?:[/?#]|$)"));
+      if (!match) continue;
+      const id = Number(match[1]);
+      if (!Number.isSafeInteger(id) || id <= 0) continue;
 
       $("<a>")
         .addClass("remove-from-set-button")
@@ -447,7 +469,7 @@ export class Miscellaneous extends RE6Module {
         .insertAfter($link)
         .on("click", (event) => {
           event.preventDefault();
-          PostActions.removeSet(id, post.id);
+          PostActions.removeSet(id, postID);
         });
     }
   }

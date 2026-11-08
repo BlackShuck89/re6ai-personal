@@ -1,10 +1,8 @@
 import { PostViewer } from "../../modules/post/PostViewer";
 import { BetterSearch } from "../../modules/search/BetterSearch";
 import { CustomFlagger } from "../../modules/search/CustomFlagger";
-import { E621 } from "../api/E621";
 import { APIPost, PostFlag, PostRating } from "../api/responses/APIPost";
 import { Blacklist } from "../data/Blacklist";
-import { Page, PageDefinition } from "../data/Page";
 import { Tag } from "../data/Tag";
 import { ModuleController } from "../ModuleController";
 import { Debug } from "../utility/Debug";
@@ -13,8 +11,6 @@ import { PostParts } from "./PostParts";
 import { PostSet } from "./PostSet";
 
 export class Post implements PostData {
-
-  private static prefetchedViewingPost: PostData | null = null;
 
   public $ref: JQuery<HTMLElement>;       // reference to the post's DOM object
 
@@ -288,38 +284,7 @@ export class Post implements PostData {
   public static getViewingPost (): Post {
     const container = $("#image-container");
     if (container.data("wfpost") !== undefined) return Post.get(container);
-    return new Post(this.prefetchedViewingPost || PostData.fromDOM(), container);
-  }
-
-  /**
-   * Load the current post before modules initialize.
-   *
-   * The old e6AI layout embeds a base64 `#post-data` block. On blep.art
-   * this element may be absent or use different fields, so fall back to the
-   * normal post JSON endpoint. Cache the data only; the Post instance must
-   * still be created after module registration has initialized filters.
-   */
-  public static async prepareViewingPostData (): Promise<void> {
-    if (!Page.matches(PageDefinition.post)) return;
-
-    try {
-      this.prefetchedViewingPost = PostData.fromDOM();
-      return;
-    } catch (domError) {
-      const match = window.location.pathname.match(/^\/posts\/(\d+)/);
-      if (!match) return;
-
-      try {
-        const data = await E621.Post.id(match[1]).first<APIPost>();
-        if (!data || !data.id) throw new Error("Post API returned no post data");
-        this.prefetchedViewingPost = PostData.fromAPI(data, "0");
-        Debug.log("Post data loaded via JSON API instead of page metadata");
-      } catch (apiError) {
-        // Leave unrelated modules available and preserve diagnostics if the
-        // site or the user's session cannot return post data.
-        console.warn("re6AI Personal: post data unavailable from DOM and API", domError, apiError);
-      }
-    }
+    return new Post(PostData.fromDOM(), container);
   }
 
   /**
@@ -517,6 +482,7 @@ export namespace PostData {
    */
   export function fromAPI (data: APIPost, page?: string): PostData {
 
+    const groups = APIPost.normalizeTags(data.tags);
     const tags = APIPost.getTagSet(data),
       flags = PostFlag.get(data);
 
@@ -548,15 +514,15 @@ export namespace PostData {
       tagString: [...tags].sort().join(" "),
       tags: {
         all: tags,
-        director: new Set(data.tags.director),
-        real_director: new Set(data.tags.director.filter(tag => Tag.isArtist(tag))),
-        franchise: new Set(data.tags.franchise),
-        species: new Set(data.tags.species),
-        character: new Set(data.tags.character),
-        general: new Set(data.tags.general),
-        invalid: new Set(data.tags.invalid),
-        meta: new Set(data.tags.meta),
-        lore: new Set(data.tags.lore),
+        director: new Set(groups.director),
+        real_director: new Set(groups.director.filter(tag => Tag.isArtist(tag))),
+        franchise: new Set(groups.franchise),
+        species: new Set(groups.species),
+        character: new Set(groups.character),
+        general: new Set(groups.general),
+        invalid: new Set(groups.invalid),
+        meta: new Set(groups.meta),
+        lore: new Set(groups.lore),
       },
       tagCategoriesKnown: true,
 
@@ -613,47 +579,39 @@ export namespace PostData {
   export function fromDOM (): PostData {
 
     const rawPostData = document.getElementById("post-data");
-    if (!rawPostData || !rawPostData.textContent || !rawPostData.textContent.trim())
-      throw new Error("Post metadata block is unavailable");
+    if (!rawPostData) throw new Error("Post data not found in DOM");
 
-    const text = rawPostData.textContent.trim();
-    let currentPostData: RawPostObject;
-    try {
-      // The original site embeds base64 JSON. Some versions output plain
-      // JSON, which should not be passed through atob().
-      const decoded = text.startsWith("{") ? text : atob(text);
-      const payload = JSON.parse(decoded);
-      const post = payload && payload.post ? payload.post : payload;
+    const raw = (rawPostData.textContent || "").trim();
+    if (!raw) throw new Error("Post data is empty");
 
-      // Some Danbooru versions embed the API response rather than the
-      // legacy page-specific `files` / `stats` shape.
-      if (post && post.file && post.score && post.tags)
-        return PostData.fromAPI(post as APIPost, "0");
-
-      currentPostData = post as RawPostObject;
-    } catch (error) {
-      throw new Error("Post metadata is not valid JSON or base64 JSON");
-    }
+    // Support both the older base64 post blueprint and the newer JSON
+    // structure. Blep can embed an API-style post rather than the old
+    // e6AI files.meta / stats shape.
+    const parsed: any = JSON.parse(raw.startsWith("{") ? raw : atob(raw));
+    const currentPostData = (parsed?.post || parsed) as RawPostObject;
+    if (currentPostData && currentPostData["file"] && currentPostData["score"])
+      return PostData.fromAPI(currentPostData as unknown as APIPost, "0");
 
     if (!currentPostData || !currentPostData.files || !currentPostData.files.meta
-      || !currentPostData.files.original || !currentPostData.stats
-      || !currentPostData.flags || !currentPostData.tags || !currentPostData.relationships)
-      throw new Error("Post metadata has an unsupported structure");
+      || !currentPostData.stats || !currentPostData.flags || !currentPostData.tags
+      || !currentPostData.relationships)
+      throw new Error("Unsupported embedded post metadata");
 
     const flags = new Set<PostFlag>();
     if (currentPostData.flags.pending) flags.add(PostFlag.Pending);
     if (currentPostData.flags.flagged) flags.add(PostFlag.Flagged);
     if (currentPostData.flags.deleted) flags.add(PostFlag.Deleted);
 
+    const groups = APIPost.normalizeTags(currentPostData.tags);
     const allTags = new Set<string>([
-      ...currentPostData.tags.director,
-      ...currentPostData.tags.franchise,
-      ...currentPostData.tags.species,
-      ...currentPostData.tags.character,
-      ...currentPostData.tags.general,
-      ...currentPostData.tags.invalid,
-      ...currentPostData.tags.meta,
-      ...currentPostData.tags.lore,
+      ...groups.director,
+      ...groups.franchise,
+      ...groups.species,
+      ...groups.character,
+      ...groups.general,
+      ...groups.invalid,
+      ...groups.meta,
+      ...groups.lore,
     ]);
 
     const result = {
@@ -680,15 +638,15 @@ export namespace PostData {
       tagString: [...allTags].sort().join(" "),
       tags: {
         all: allTags,
-        director: new Set(currentPostData.tags.director),
-        real_director: new Set(currentPostData.tags.director.filter(tag => Tag.isArtist(tag))),
-        franchise: new Set(currentPostData.tags.franchise),
-        species: new Set(currentPostData.tags.species),
-        character: new Set(currentPostData.tags.character),
-        general: new Set(currentPostData.tags.general),
-        invalid: new Set(currentPostData.tags.invalid),
-        meta: new Set(currentPostData.tags.meta),
-        lore: new Set(currentPostData.tags.lore),
+        director: new Set(groups.director),
+        real_director: new Set(groups.director.filter(tag => Tag.isArtist(tag))),
+        franchise: new Set(groups.franchise),
+        species: new Set(groups.species),
+        character: new Set(groups.character),
+        general: new Set(groups.general),
+        invalid: new Set(groups.invalid),
+        meta: new Set(groups.meta),
+        lore: new Set(groups.lore),
       },
       tagCategoriesKnown: true,
 

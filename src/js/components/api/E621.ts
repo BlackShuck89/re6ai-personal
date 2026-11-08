@@ -4,6 +4,7 @@
 import { Debug } from "../utility/Debug";
 import { Util } from "../utility/Util";
 import { APIResponse } from "./responses/APIResponse";
+import { unwrapResponse } from "./responses/ResponseUnwrap";
 
 // All endpoints must be registered here.
 // Name is irrelevant, as long as it is unique.
@@ -202,10 +203,11 @@ class APIEndpoint {
    * @param hasParam Whether or not the endpoint had a parameter
    */
   private formatData<T extends APIResponse>(data: any, node: string): T[] {
-    if (node !== undefined) data = data[node];
-
-    if (Array.isArray(data)) return data as T[];
-    else return [data as T];
+    // Current blep.art endpoints normally return { posts: [...] } or
+    // { post: {...} }, but some Danbooru versions return the value directly.
+    // In the latter case, blindly reading data[node] yielded [undefined],
+    // which crashed search rendering and lazy post downloads.
+    return unwrapResponse<T>(data, node);
   }
 
 }
@@ -384,46 +386,59 @@ export class E621 {
       const item = this.queue.shift();
       Debug.connectLog(item.request.url);
 
-      await new Promise<void>(async (resolve) => {
-        fetch(item.request).then(
-          async (response) => {
-            if (response.ok) {
-              let responseText = await response.text();
-              if (!responseText) responseText = "[]";
+      // Invalid JSON, a timed-out fetch, or a decoding error must never
+      // leave the entire API queue blocked. Every request settles and the
+      // queued caller receives an error instead of an unresolved Promise.
+      await new Promise<void>((resolve) => {
+        const controller = new AbortController();
+        const timeout = window.setTimeout(() => controller.abort(), 20000);
+        const failure = (error: any): void => {
+          this.emitter.trigger(
+            "api.re621.result-" + item.index,
+            [
+              { error: error instanceof Error ? error.message : String(error) },
+              500,
+              item.endpoint,
+              item.node,
+            ],
+          );
+        };
 
-              this.emitter.trigger(
-                "api.re621.result-" + item.index,
-                [
-                  JSON.parse(responseText),
-                  response.status,
-                  item.endpoint,
-                  item.node,
-                ],
-              );
-            } else {
-              this.emitter.trigger(
-                "api.re621.result-" + item.index,
-                [
-                  { error: response.status + " " + response.statusText },
-                  response.status,
-                  item.endpoint,
-                  item.node,
-                ],
-              );
+        fetch(item.request, { signal: controller.signal }).then(
+          async (response) => {
+            try {
+              if (!response.ok) {
+                this.emitter.trigger(
+                  "api.re621.result-" + item.index,
+                  [
+                    { error: response.status + " " + response.statusText },
+                    response.status,
+                    item.endpoint,
+                    item.node,
+                  ],
+                );
+              } else {
+                const responseText = await response.text();
+                const parsed = JSON.parse(responseText || "[]");
+                this.emitter.trigger(
+                  "api.re621.result-" + item.index,
+                  [parsed, response.status, item.endpoint, item.node],
+                );
+              }
+            } catch (error) {
+              failure(error);
+            } finally {
+              clearTimeout(timeout);
+              resolve();
             }
-            resolve();
           },
           (error) => {
-            this.emitter.trigger(
-              "api.re621.result-" + item.index,
-              [
-                { error: (error && error[0]) ? error[1] + " " + error[0].error : "unknown error" },
-                (error && error[0]) ? error[1] : 500,
-                item.endpoint,
-                item.node,
-              ],
-            );
-            resolve();
+            try {
+              failure(error);
+            } finally {
+              clearTimeout(timeout);
+              resolve();
+            }
           },
         );
       });

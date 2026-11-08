@@ -1,23 +1,22 @@
-# re6AI Personal
+# reBlep Personal
 
-**An independently maintained enhancement userscript being adapted for [blep.art](https://blep.art/), based on re6AI and re621.**
+**An independently maintained enhancement userscript for [blep.art](https://blep.art/), derived from re6AI and re621.**
 
-re6AI Personal began as a personal continuation of [re6AI](https://github.com/re621/re6ai), the e6AI adaptation of bitWolfy's [re621](https://github.com/re621/re621.Legacy) userscript. With e6AI's closure announced for **November 13, 2026**, the active port now targets **blep.art**, a compatible Danbooru-based imageboard.
+reBlep Personal began as a personal continuation of [re6AI](https://github.com/re621/re6ai), the e6AI adaptation of bitWolfy's [re621](https://github.com/re621/re621.Legacy) userscript. With e6AI's closure announced for **November 13, 2026**, the active port now targets **blep.art**, a compatible Danbooru-based imageboard.
 
-The migration is being developed on [`feature/blep-art-port`](https://github.com/BlackShuck89/re6ai-personal/tree/feature/blep-art-port), separate from the previously published e6AI version.
+The name **reBlep Personal** reflects the move to blep.art. Earlier versions were published as **re6AI Personal**; they remain available under the same repository and GitHub release history.
 
 The repository has been **detached from GitHub's fork network** and is maintained as an independent project. This changes repository ownership and maintenance, **not** the project's origins, copyrights, or license. It is **not** an official re621, re6AI, e6AI or blep.art release.
 
 ## Current status
 
-**blep.art port in progress.** The new-domain version is undergoing builds and browser verification; it is not yet a published stable release.
+**Current tested beta: v1.2.0-beta.7.** This release builds on the blep.art migration and fixes search-result loading, renamed downloads from the native three-dot menu, and favorite-to-upvote behavior. The maintainer verified those fixes in Firefox/Tampermonkey; automated regression tests also pass. This is still beta software.
 
-- **[`master`](https://github.com/BlackShuck89/re6ai-personal/tree/master)** currently contains the published e6AI-only v1.1.0 Beta 1.
-- **[`feature/blep-art-port`](https://github.com/BlackShuck89/re6ai-personal/tree/feature/blep-art-port)** targets blep.art (v1.2.0 Beta 1 in development); it will be merged only after testing.
-- Changes are reviewed through [pull requests](https://github.com/BlackShuck89/re6ai-personal/pulls) before being brought into `master`.
-- The previous e6AI beta passed a basic smoke test. The blep.art port needs its own compatibility testing; see [migration notes](docs/BLEP_ART_PORT.md).
+- **[`master`](https://github.com/BlackShuck89/re6ai-personal/tree/master)** is the default branch for reviewed builds and releases.
+- **[Releases](https://github.com/BlackShuck89/re6ai-personal/releases)** contain the installable userscript and archived builds.
+- **[Pull requests](https://github.com/BlackShuck89/re6ai-personal/pulls)** are used for new fixes and upstream feature modernization.
 
-This project currently builds on the **re621/re6AI 1.x-era architecture**, not the rewritten re621 2.x codebase. [re621 2.x](https://github.com/re621/re621-alpha) is a reference for potential future enhancements; feature parity has **not** been achieved.
+The project retains its **re621/re6AI 1.x-derived architecture**. Improvements from [re621 2.x](https://github.com/re621/re621-alpha) are ported selectively; full feature parity is not claimed.
 
 ## Features and goals
 
@@ -25,23 +24,19 @@ The inherited code includes modules for subscriptions and notifications, custom 
 
 The goals of this independent continuation are to:
 
-- Make the existing features work on blep.art without calling e6AI's retired static-host URLs.
-- Preserve the working e6AI beta while validating blep-specific subscriptions, downloads and profiles.
-- Keep the script's name, update URLs, issue tracking, and releases independent of upstream.
-- Import useful newer re621 features **selectively**, without discarding e6AI-specific functionality.
+- Keep the existing features compatible with blep.art without relying on retired e6AI hosts.
+- Preserve archived e6AI versions and avoid mixing old-site account IDs or settings.
+- Keep the script's identity, release URLs, issue tracking, and maintenance independent of upstream.
+- Integrate useful newer re621 features **selectively**, without discarding established functionality.
 - Improve testing and browser compatibility while retaining user settings where practical.
 
 ## Installation
 
-The project is intended for a userscript manager such as [Violentmonkey](https://violentmonkey.github.io/) or [Tampermonkey](https://www.tampermonkey.net/).
+Install [Tampermonkey](https://www.tampermonkey.net/) or [Violentmonkey](https://violentmonkey.github.io/) and open the **[latest reBlep Personal prerelease](https://github.com/BlackShuck89/re6ai-personal/releases/tag/v1.2.0-beta.7)**. Use the `script.user.js` asset and confirm the installed script targets `https://blep.art/*`.
 
-**Current published release:** [v1.1.0 Beta 1](https://github.com/BlackShuck89/re6ai-personal/releases/tag/v1.1.0-beta.1), which targets **e6ai.net only**. Do **not** install it expecting blep.art support.
+**Renaming from re6AI Personal to reBlep Personal changes the displayed userscript name.** The blep.art script's `@namespace` and saved setting keys are intentionally unchanged, but a userscript manager may treat the renamed userscript as a new installation. Back up your existing settings and subscriptions first, and **disable the older blep.art script if both names appear** to avoid duplicate page modifications. Do not assume the manager automatically transfers settings.
 
-**blep.art development port:** after the [port pull request](https://github.com/BlackShuck89/re6ai-personal/pulls) passes CI, download its GitHub Actions artifact `script.user.js` for testing. A separately named **re6AI Personal — blep.art** script is built as **v1.2.0-beta.1**. It is not released until browser tests confirm compatibility.
-
-The old e6AI script and new blep.art script use **different `@match`, `@name`, and `@namespace` values** to prevent old subscription IDs from being applied to blep's independent database. They can be installed side by side, although the old one will stop working once e6AI closes. Personal settings and subscriptions are **not automatically migrated**.
-
-To import e6AI favorites into blep, use [blep's official favorites import page](https://blep.art/maintenance/user/e6ai_favorite_import). Release metadata is pinned to explicit beta tags; new beta versions may require manual installation.
+Older e6AI releases remain archived. Do not install them expecting blep.art support. For historical e6AI favorites, use [blep.art's official importer](https://blep.art/maintenance/user/e6ai_favorite_import). Existing beta releases have pinned update URLs, so installing this beta manually may be necessary.
 
 ## Build the userscript
 
@@ -50,14 +45,14 @@ Install [Bun](https://bun.sh/), then:
 ```sh
 git clone https://github.com/BlackShuck89/re6ai-personal.git
 cd re6ai-personal
-git checkout feature/blep-art-port
+git checkout master
 bun install --frozen-lockfile
 bun run compile-typescript:prod
 bun run compile-sass:prod
 bun run compose-userscript:prod
 ```
 
-The intended userscript output is `build/userscript/script.user.js`. GitHub Actions checks compile the port, but live blep.art testing remains necessary. The inherited browser-extension build is not a supported release target at this stage.
+The intended userscript output is `build/userscript/script.user.js`. GitHub Actions checks compile the project and execute blep.art compatibility fixtures; browser testing still matters. The inherited browser-extension build is not a supported release target at this stage.
 
 ## Original projects and attribution
 
@@ -70,16 +65,16 @@ This is a **derivative work**, not a clean-room rewrite. Credit for the inherite
 | **[re6AI](https://github.com/re621/re6ai)** | Existing adaptation of re621 for e6ai.net, used as the **direct source** of this repository's initial code. |
 | **Sindrake** | Credited contributor to the re6AI project and its e6AI adaptation. |
 | **Earlopain** | Credited contributor to the original re621 and re6AI projects. |
-| **[BlackShuck89](https://github.com/BlackShuck89)** | Maintainer of this independent re6AI Personal continuation and subsequent changes. |
+| **[BlackShuck89](https://github.com/BlackShuck89)** | Maintainer of this independent reBlep Personal continuation and subsequent changes. |
 
 Original authorship and attribution remain in the package metadata and version history where available. Future external contributions and copied/adapted code should retain their applicable notices and be credited appropriately.
 
 **License:** The inherited project is distributed under the **GNU General Public License version 3 (GPLv3)**. This derivative remains under GPLv3; see [LICENSE](LICENSE). Detaching from GitHub's fork network does not transfer exclusive ownership of upstream code or remove its license requirements.
 
-The names re621, re6AI, and e6AI identify their respective projects and site; this repository is independent and does not imply endorsement by their creators or operators.
+The names re621, re6AI, and e6AI identify their respective upstream projects and site; this repository is independent and does not imply endorsement by their creators or operators.
 
 ## Issues and contributions
 
-Please report bugs and suggestions in [re6AI Personal Issues](https://github.com/BlackShuck89/re6ai-personal/issues) rather than upstream's issue tracker. Changes from the original projects are reviewed and incorporated manually; the repository does not automatically synchronize with upstream.
+Please report bugs and suggestions in [reBlep Personal Issues](https://github.com/BlackShuck89/re6ai-personal/issues) rather than upstream's issue tracker. Changes from the original projects are reviewed and incorporated manually; the repository does not automatically synchronize with upstream.
 
 For background, releases, and additional acknowledgements, consult the [original re6AI repository](https://github.com/re621/re6ai), [re621 Legacy](https://github.com/re621/re621.Legacy), and [re621 2.x](https://github.com/re621/re621-alpha).

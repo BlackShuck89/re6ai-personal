@@ -12,7 +12,7 @@ import { ThemeCustomizer } from "../general/ThemeCustomizer";
  */
 export class PostViewer extends RE6Module {
 
-  private post: Post;
+  private favoriteObserver: MutationObserver;
 
   public constructor () {
     super([PageDefinition.post, PageDefinition.changes, PageDefinition.iqdb], true);
@@ -132,7 +132,10 @@ export class PostViewer extends RE6Module {
 
     if (!Page.matches(PageDefinition.post)) return;
 
-    this.post = Post.getViewingPost();
+    // Install the favorite/upvote handler before optional post DOM work.
+    // Some blep pages omit the legacy post metadata; a parse exception must
+    // not silently disable this feature.
+    this.installFavoriteUpvote();
 
     // Add a new note button
     const translateButton = $("#translate");
@@ -173,18 +176,38 @@ export class PostViewer extends RE6Module {
     // Bolden the tags
     this.toggleBoldenedTags(this.fetchSettings<boolean>("boldenTags"));
 
-    // Listen to favorites button attribute change
-    const favoriteButton = document.querySelector(".ptbr-favorite-button");
+  }
 
-    const mutationObserver = new MutationObserver((mutations) => {
-      if (!this.fetchSettings("upvoteOnFavorite") || $(".ptbr-vote[data-vote=1]")[0] || favoriteButton.getAttribute("favorited") != "true") return;
-      $(".ptbr-vote-button[data-action=1]")[0].click();
+  private installFavoriteUpvote (): void {
+    const favoriteButton = document.querySelector<HTMLElement>(".ptbr-favorite-button");
+    if (!favoriteButton || this.favoriteObserver) return;
+
+    this.favoriteObserver = new MutationObserver(() => {
+      if (!this.fetchSettings<boolean>("upvoteOnFavorite")) return;
+      if (favoriteButton.getAttribute("favorited") !== "true") return;
+
+      const voteWrap = document.querySelector<HTMLElement>(".ptbr-vote");
+      // Don't click an already-selected vote: the site's native handler
+      // would otherwise REMOVE an upvote rather than adding one.
+      if (!voteWrap || voteWrap.getAttribute("data-vote") === "1") return;
+
+      const upvote = voteWrap.querySelector<HTMLButtonElement>(".ptbr-vote-button[data-action='1']");
+      if (!upvote || upvote.getAttribute("processing") === "true") return;
+      upvote.click();
     });
 
-    mutationObserver.observe(favoriteButton, {
+    this.favoriteObserver.observe(favoriteButton, {
       attributes: true,
       attributeFilter: ["favorited"],
     });
+  }
+
+  public destroy (): void {
+    if (this.favoriteObserver) {
+      this.favoriteObserver.disconnect();
+      this.favoriteObserver = null;
+    }
+    super.destroy();
   }
 
   /** Toggles the boldened look on sidebar tags */
