@@ -13,6 +13,7 @@ import { Debug } from "../../components/utility/Debug";
 import { Icons } from "../../components/utility/Icons";
 import { Util } from "../../components/utility/Util";
 import { DownloadCustomizer } from "../post/DownloadCustomizer";
+import { PostViewer } from "../post/PostViewer";
 import { BlacklistEnhancer } from "./BlacklistEnhancer";
 
 export class BetterSearch extends RE6Module {
@@ -808,10 +809,38 @@ export class BetterSearch extends RE6Module {
           break;
         }
         case "add-fav": {
-          // TODO Replace with PostActions
-          E621.Favorites.post({ "post_id": post.id });
-          post.is_favorited = true;
-          post.$ref.attr("fav", "true");
+          // Only mark a post as favorited once the server accepts it.
+          // Keep the same auto-upvote preference as the individual post page.
+          void PostActions.addFavorite(post.id).then(async (added) => {
+            if (!added) {
+              Danbooru.error("Unable to favorite the post.");
+              return;
+            }
+            post.is_favorited = true;
+            post.$ref.attr("fav", "true");
+
+            if (!ModuleController.fetchSettings<boolean>(PostViewer, "upvoteOnFavorite"))
+              return;
+            if (post.user_score === 1 || post.$ref.attr("vote") === "1")
+              return;
+
+            // no_unvote prevents accidentally removing an existing upvote.
+            const vote = await PostActions.vote(post.id, 1, true);
+            if (!vote.success) {
+              Danbooru.error("Favorite added, but automatic upvote failed.");
+              return;
+            }
+            post.user_score = 1;
+            post.$ref.attr("vote", "1");
+            post.score = {
+              up: vote.up || 0,
+              down: vote.down || 0,
+              total: vote.score || 0,
+            };
+            post.$ref.trigger("re621:update");
+          }).catch((error) => {
+            console.error("re6AI Personal: favorite/upvote failed", error);
+          });
           break;
         }
         case "remove-fav": {
