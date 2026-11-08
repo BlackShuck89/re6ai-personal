@@ -20,6 +20,14 @@ assert.equal(pkg.displayName, "reBlep");
 assert.equal(pkg.namespace, "https://github.com/BlackShuck89/re6ai-personal/blep.art");
 assert.equal(pkg.github, "https://github.com/BlackShuck89/reblep");
 assert.equal(pkg.repository.url, "git+https://github.com/BlackShuck89/reblep.git");
+assert.equal(meta.name, "%DISPLAYNAME%");
+assert(meta.updateURL.includes("v1.2.0-beta.8/script.meta.js"));
+assert(meta.downloadURL.includes("v1.2.0-beta.8/script.user.js"));
+assert(meta.icon.includes("BlackShuck89/reblep@master"));
+assert(meta.icon64.includes("BlackShuck89/reblep@master"));
+assert(read("src/js/components/utility/VersionChecker.ts").includes(
+  "https://api.github.com/repos/BlackShuck89/reblep/releases"),
+  "Update checker must use the renamed repository");
 assert.match(pkg.namespace, /\/blep\.art$/);
 assert.deepEqual(meta.match, ["https://blep.art/*"]);
 assert(meta.connect.includes("blep.art"), "Blep API origin must be permitted");
