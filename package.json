@@ -2,7 +2,7 @@
   "name": "re6ai-personal",
   "displayName": "re6AI Personal — blep.art",
   "namespace": "https://github.com/BlackShuck89/re6ai-personal/blep.art",
-  "version": "1.2.0-beta.3",
+  "version": "1.2.0-beta.4",
   "description": "Independently maintained enhancement userscript for blep.art, adapted from re6AI/re621",
   "author": "bitWolfy",
   "contributors": [
