@@ -1217,7 +1217,7 @@ export class SettingsController extends RE6Module {
         Form.checkbox(
           {
             value: downloadCustomizer.fetchSettings("confirmDownload"),
-            label: `<b>Confirm Downloads</b><br />Show the "Save As" dialog for every file.<br />Requires "Download Mode" to be set to "Browser API" in script manager settings`,
+            label: `<b>Confirm Downloads</b><br />Ask to confirm or edit the generated filename before downloading.<br />To choose a save location in Firefox, enable "Always ask you where to save files" in browser settings.`,
             width: 3,
           },
           async (data) => { await downloadCustomizer.pushSettings("confirmDownload", data); },
