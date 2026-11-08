@@ -71,6 +71,27 @@ assert(connect.includes("URL.revokeObjectURL(objectUrl);"),
   "Blob download URL must be cleaned up");
 assert(customizer.includes("XM.Connect.download({"),
   "Individual post downloads should preserve the configured filename");
+// The native post toolbar dropdown must be routed through the same named
+// downloader, including entries dynamically inserted by the site itself.
+assert(customizer.includes("this.installNativeDownloadHandler();"),
+  "Post-page initialization must intercept the site's existing dropdown");
+assert(customizer.includes('document.addEventListener("click", this.nativeDownloadHandler, true);'),
+  "Native download interception must run in the capture phase");
+assert(customizer.includes('document.removeEventListener("click", this.nativeDownloadHandler, true);'),
+  "Native handler must be removed when the module is disabled");
+assert(customizer.includes(".ptbr-etc-menu a[href]"),
+  "Native menu download anchors should be intercepted");
+assert(customizer.includes("a[download][href]"),
+  "Alternative native download anchors should be intercepted");
+assert(customizer.includes("if (!this.isPostMediaLink(link)) return;"),
+  "Native interception must ignore unrelated menu actions");
+assert(customizer.includes("this.startNamedDownload();"),
+  "The native menu must use the same named download path as the custom link");
+assert(!customizer.includes('$(".ptbr-etc-download, #image-download-link").hide();'),
+  "Do not hide the site's existing dropdown or fullscreen controls");
+assert(customizer.includes('url.pathname.includes("/data/")'),
+  "Dynamic media URL checks should support alternate post download links");
+
 assert(!customizer.includes("XM.Connect.browserDownload("),
   "Individual post downloads must not use the filename-ignoring path");
 assert(customizer.includes("this.getDownloadFileName()"),
