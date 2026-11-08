@@ -142,7 +142,7 @@ export class VersionChecker {
    * @param node Version number, or "latest"
    */
   private static async getGithubData (node: string): Promise<any> {
-    const url = "https://api.github.com/repos/BlackShuck89/re6ai-personal/releases"
+    const url = "https://api.github.com/repos/BlackShuck89/reblep/releases"
       + (node === "latest" ? "?per_page=30" : "/" + node);
     return XM.Connect.xmlHttpPromise({ url, method: "GET" }).then(
       (response: GMxmlHttpRequestResponse) => { return Promise.resolve(JSON.parse(response.responseText)); },
