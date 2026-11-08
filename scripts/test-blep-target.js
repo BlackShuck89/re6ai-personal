@@ -71,31 +71,44 @@ assert(connect.includes("URL.revokeObjectURL(objectUrl);"),
   "Blob download URL must be cleaned up");
 assert(customizer.includes("XM.Connect.download({"),
   "Individual post downloads should preserve the configured filename");
-// The native post toolbar dropdown must be routed through the same named
-// downloader, including entries dynamically inserted by the site itself.
+// The upstream toolbar renders this Download action as:
+// #ptbr-etc-menu > a.ptbr-etc-download[data-hotkey="download"]
+// Its URL can be a /data/download/ endpoint, not Post.file.original.
 assert(customizer.includes("this.installNativeDownloadHandler();"),
-  "Post-page initialization must intercept the site's existing dropdown");
+  "Post-page initialization must always install its native menu handler");
 assert(customizer.includes('document.addEventListener("click", this.nativeDownloadHandler, true);'),
-  "Native download interception must run in the capture phase");
+  "Native download interception must run before the site's click handlers");
 assert(customizer.includes('document.removeEventListener("click", this.nativeDownloadHandler, true);'),
   "Native handler must be removed when the module is disabled");
-assert(customizer.includes(".ptbr-etc-menu a[href]"),
-  "Native menu download anchors should be intercepted");
-assert(customizer.includes("a[download][href]"),
-  "Alternative native download anchors should be intercepted");
-assert(customizer.includes("if (!this.isPostMediaLink(link)) return;"),
-  "Native interception must ignore unrelated menu actions");
-assert(customizer.includes("this.startNamedDownload();"),
-  "The native menu must use the same named download path as the custom link");
+assert(customizer.includes(".ptbr-etc-download"),
+  "Match the actual three-dot dropdown Download entry");
+assert(customizer.includes("[data-hotkey='download']"),
+  "Match the site's download hotkey attribute");
+assert(customizer.includes("event.stopImmediatePropagation();"),
+  "Block the site's original hash-named download action");
+assert(customizer.includes("const byLabel ="),
+  "Support button-like menu layouts by their label, scoped to the menu");
+assert(customizer.includes("void this.startNamedDownload();"),
+  "Native menu downloads must be routed through the named handler");
+assert(!customizer.includes("isPostMediaLink"),
+  "Do not filter out the native Download URL by comparing it to the image URL");
+const createBlock = customizer.slice(customizer.indexOf("public create (): void"),
+  customizer.indexOf("public destroy (): void"));
+assert(!createBlock.includes("Post.getViewingPost()"),
+  "DownloadCustomizer must not parse post metadata before attaching the menu handler");
+assert(!createBlock.includes("await E621"),
+  "DownloadCustomizer initialization must not wait on an API request");
+assert(customizer.includes("E621.Post.id(postID).first<APIPost>()"),
+  "Resolve missing post metadata lazily when a download is requested");
+assert(customizer.includes("if (!native.length)"),
+  "Do not add a duplicate Download button when the site already provides one");
 assert(!customizer.includes('$(".ptbr-etc-download, #image-download-link").hide();'),
-  "Do not hide the site's existing dropdown or fullscreen controls");
-assert(customizer.includes('url.pathname.includes("/data/")'),
-  "Dynamic media URL checks should support alternate post download links");
+  "Do not hide the site's three-dot menu or fullscreen controls");
 
 assert(!customizer.includes("XM.Connect.browserDownload("),
   "Individual post downloads must not use the filename-ignoring path");
-assert(customizer.includes("this.getDownloadFileName()"),
-  "Post download links should be refreshed from the current settings");
+assert(customizer.includes("this.getDownloadFileName(post)"),
+  "Downloads must use the current filename settings and resolved post metadata");
 assert(search.includes("XM.Connect.download({"),
   "Search-mode downloads should use the filename-preserving path");
 assert(search.includes("DownloadCustomizer.getFileName(post)"),
