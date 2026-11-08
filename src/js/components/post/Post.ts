@@ -482,6 +482,7 @@ export namespace PostData {
    */
   export function fromAPI (data: APIPost, page?: string): PostData {
 
+    const groups = APIPost.normalizeTags(data.tags);
     const tags = APIPost.getTagSet(data),
       flags = PostFlag.get(data);
 
@@ -513,15 +514,15 @@ export namespace PostData {
       tagString: [...tags].sort().join(" "),
       tags: {
         all: tags,
-        director: new Set(data.tags.director),
-        real_director: new Set(data.tags.director.filter(tag => Tag.isArtist(tag))),
-        franchise: new Set(data.tags.franchise),
-        species: new Set(data.tags.species),
-        character: new Set(data.tags.character),
-        general: new Set(data.tags.general),
-        invalid: new Set(data.tags.invalid),
-        meta: new Set(data.tags.meta),
-        lore: new Set(data.tags.lore),
+        director: new Set(groups.director),
+        real_director: new Set(groups.director.filter(tag => Tag.isArtist(tag))),
+        franchise: new Set(groups.franchise),
+        species: new Set(groups.species),
+        character: new Set(groups.character),
+        general: new Set(groups.general),
+        invalid: new Set(groups.invalid),
+        meta: new Set(groups.meta),
+        lore: new Set(groups.lore),
       },
       tagCategoriesKnown: true,
 
@@ -580,26 +581,37 @@ export namespace PostData {
     const rawPostData = document.getElementById("post-data");
     if (!rawPostData) throw new Error("Post data not found in DOM");
 
-    const decodedData = atob(rawPostData.textContent || "");
-    if (!decodedData) throw new Error("Post data is empty");
+    const raw = (rawPostData.textContent || "").trim();
+    if (!raw) throw new Error("Post data is empty");
 
-    const currentPostData = JSON.parse(decodedData) as RawPostObject;
-    console.log("CurrentPostData:", currentPostData);
+    // Support both the older base64 post blueprint and the newer JSON
+    // structure. Blep can embed an API-style post rather than the old
+    // e6AI files.meta / stats shape.
+    const parsed: any = JSON.parse(raw.startsWith("{") ? raw : atob(raw));
+    const currentPostData = (parsed?.post || parsed) as RawPostObject;
+    if (currentPostData && currentPostData["file"] && currentPostData["score"])
+      return PostData.fromAPI(currentPostData as unknown as APIPost, "0");
+
+    if (!currentPostData || !currentPostData.files || !currentPostData.files.meta
+      || !currentPostData.stats || !currentPostData.flags || !currentPostData.tags
+      || !currentPostData.relationships)
+      throw new Error("Unsupported embedded post metadata");
 
     const flags = new Set<PostFlag>();
     if (currentPostData.flags.pending) flags.add(PostFlag.Pending);
     if (currentPostData.flags.flagged) flags.add(PostFlag.Flagged);
     if (currentPostData.flags.deleted) flags.add(PostFlag.Deleted);
 
+    const groups = APIPost.normalizeTags(currentPostData.tags);
     const allTags = new Set<string>([
-      ...currentPostData.tags.director,
-      ...currentPostData.tags.franchise,
-      ...currentPostData.tags.species,
-      ...currentPostData.tags.character,
-      ...currentPostData.tags.general,
-      ...currentPostData.tags.invalid,
-      ...currentPostData.tags.meta,
-      ...currentPostData.tags.lore,
+      ...groups.director,
+      ...groups.franchise,
+      ...groups.species,
+      ...groups.character,
+      ...groups.general,
+      ...groups.invalid,
+      ...groups.meta,
+      ...groups.lore,
     ]);
 
     const result = {
@@ -626,15 +638,15 @@ export namespace PostData {
       tagString: [...allTags].sort().join(" "),
       tags: {
         all: allTags,
-        director: new Set(currentPostData.tags.director),
-        real_director: new Set(currentPostData.tags.director.filter(tag => Tag.isArtist(tag))),
-        franchise: new Set(currentPostData.tags.franchise),
-        species: new Set(currentPostData.tags.species),
-        character: new Set(currentPostData.tags.character),
-        general: new Set(currentPostData.tags.general),
-        invalid: new Set(currentPostData.tags.invalid),
-        meta: new Set(currentPostData.tags.meta),
-        lore: new Set(currentPostData.tags.lore),
+        director: new Set(groups.director),
+        real_director: new Set(groups.director.filter(tag => Tag.isArtist(tag))),
+        franchise: new Set(groups.franchise),
+        species: new Set(groups.species),
+        character: new Set(groups.character),
+        general: new Set(groups.general),
+        invalid: new Set(groups.invalid),
+        meta: new Set(groups.meta),
+        lore: new Set(groups.lore),
       },
       tagCategoriesKnown: true,
 
