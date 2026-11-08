@@ -32,12 +32,21 @@ jobs:
           test -s build/userscript/script.meta.js
           grep -Fq "reBlep" build/userscript/script.user.js
           grep -Fq "releases/download/$GIT_TAG_NAME/script.meta.js" build/userscript/script.user.js
+      - name: Package installable userscript ZIP
+        run: |
+          set -euo pipefail
+          zip -j -9 "build/userscript/reBlep-${GIT_TAG_NAME}.zip" \
+            build/userscript/script.user.js \
+            build/userscript/script.meta.js \
+            build/userscript/altver.user.js \
+            build/userscript/altver.meta.js
+          unzip -t "build/userscript/reBlep-${GIT_TAG_NAME}.zip"
       - name: Publish GitHub release
         uses: ncipollo/release-action@v1
         with:
           tag: ${{ github.ref_name }}
           name: reBlep ${{ github.ref_name }}
-          artifacts: "build/userscript/script.user.js,build/userscript/script.meta.js,build/userscript/altver.user.js,build/userscript/altver.meta.js"
+          artifacts: "build/userscript/script.user.js,build/userscript/script.meta.js,build/userscript/altver.user.js,build/userscript/altver.meta.js,build/userscript/reBlep-${{ github.ref_name }}.zip"
           prerelease: ${{ contains(github.ref_name, '-beta') || contains(github.ref_name, '-rc') }}
           makeLatest: ${{ !(contains(github.ref_name, '-beta') || contains(github.ref_name, '-rc')) }}
           generateReleaseNotes: true
