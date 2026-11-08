@@ -40,16 +40,16 @@ jobs:
       - name: Assert generated artifact
         run: |
           test -s build/userscript/script.user.js
-          grep -q 'reBlep Personal' build/userscript/script.user.js
+          grep -q 'reBlep' build/userscript/script.user.js
           test -s build/userscript/script.meta.js
           grep -Fq "releases/download/$GIT_TAG_NAME/script.meta.js" build/userscript/script.user.js
           grep -Fq "releases/download/$GIT_TAG_NAME/script.user.js" build/userscript/script.user.js
           grep -Fq "blep.art/*" build/userscript/script.meta.js
-          grep -Fq "1.2.0-beta.7" build/userscript/script.meta.js
+          grep -Fq "1.2.0-beta.8" build/userscript/script.meta.js
           ! grep -Fq "@match          https://e6ai.net" build/userscript/script.meta.js
       - name: Upload test artifact
         uses: actions/upload-artifact@v4
         with:
-          name: re6ai-personal-blep-art-test
+          name: reblep-test
           path: build/userscript/script.user.js
           retention-days: 7

@@ -1,9 +1,9 @@
 {
-  "name": "reblep-personal",
-  "displayName": "reBlep Personal",
+  "name": "reblep",
+  "displayName": "reBlep",
   "namespace": "https://github.com/BlackShuck89/re6ai-personal/blep.art",
-  "version": "1.2.0-beta.7",
-  "description": "Independent enhancement userscript for blep.art, based on re6AI and re621",
+  "version": "1.2.0-beta.8",
+  "description": "Independent enhancement userscript for blep.art, descended from re6AI/re621",
   "author": "bitWolfy",
   "contributors": [
     "bitWolfy",
@@ -80,14 +80,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/BlackShuck89/re6ai-personal.git"
+    "url": "git+https://github.com/BlackShuck89/reblep.git"
   },
   "license": "GPLv3",
   "bugs": {
-    "url": "https://github.com/BlackShuck89/re6ai-personal/issues"
+    "url": "https://github.com/BlackShuck89/reblep/issues"
   },
-  "homepage": "https://github.com/BlackShuck89/re6ai-personal",
-  "github": "https://github.com/BlackShuck89/re6ai-personal",
+  "homepage": "https://github.com/BlackShuck89/reblep",
+  "github": "https://github.com/BlackShuck89/reblep",
   "dependencies": {
     "caniuse-lite": "^1.0.30001751",
     "jquery": "^3.6.0",

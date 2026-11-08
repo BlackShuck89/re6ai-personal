@@ -360,7 +360,7 @@ export class BetterSearch extends RE6Module {
         paginator.remove();
         resolve(pagesLoaded);
       } catch (error) {
-        console.error("reBlep Personal: enhanced post search failed", error);
+        console.error("reBlep: enhanced post search failed", error);
         this.$wrapper.removeAttr("loading").removeAttr("infscroll");
         this.$wrapper.find("search-loading, search-content, paginator-container").remove();
         if (paginator.length) {
@@ -747,7 +747,7 @@ export class BetterSearch extends RE6Module {
             name: name,
             onerror: (error) => {
               Danbooru.error("Unable to download this file. See the browser console for details.");
-              console.error("reBlep Personal: search download failed", error);
+              console.error("reBlep: search download failed", error);
             },
           });
           break;
@@ -839,7 +839,7 @@ export class BetterSearch extends RE6Module {
             };
             post.$ref.trigger("re621:update");
           }).catch((error) => {
-            console.error("reBlep Personal: favorite/upvote failed", error);
+            console.error("reBlep: favorite/upvote failed", error);
           });
           break;
         }
@@ -1018,7 +1018,7 @@ export class BetterSearch extends RE6Module {
                 this.hasMorePages = result;
               },
               (error) => {
-                console.error("reBlep Personal: loading more posts failed", error);
+                console.error("reBlep: loading more posts failed", error);
                 Danbooru.error("Unable to load more posts. Try again.");
               },
             ).finally(() => {

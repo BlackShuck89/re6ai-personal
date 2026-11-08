@@ -1,4 +1,4 @@
-# Branch protection for re6AI Personal
+# Branch protection for reBlep
 
 This repository has its own changes and **must not be reset to the upstream re6AI master branch**.
 
@@ -23,7 +23,7 @@ Both policies are marked `active` in the JSON; this only becomes meaningful **af
 
 ## Activate from GitHub website
 
-1. Visit [repository rulesets](https://github.com/BlackShuck89/re6ai-personal/settings/rules).
+1. Visit [repository rulesets](https://github.com/BlackShuck89/reblep/settings/rules).
 2. Choose **New ruleset** → **Import a ruleset** (if offered), and import `.github/rulesets/protect-master.json` and then `.github/rulesets/protect-development.json`.
 3. If import is not offered, create two **branch** rulesets manually using the policies above. Target the exact branch names `master` and `development`.
 4. Set enforcement to **Active**, leave the bypass list empty, and save both.

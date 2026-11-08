@@ -14,16 +14,26 @@ const extension = JSON.parse(read("bin/extension-manifest.json"));
 const api = read("src/js/components/api/E621.ts");
 const post = read("src/js/components/post/Post.ts");
 
-assert.equal(pkg.version, "1.2.0-beta.7");
-assert.equal(pkg.name, "reblep-personal");
-assert.equal(pkg.displayName, "reBlep Personal");
+assert.equal(pkg.version, "1.2.0-beta.8");
+assert.equal(pkg.name, "reblep");
+assert.equal(pkg.displayName, "reBlep");
 assert.equal(pkg.namespace, "https://github.com/BlackShuck89/re6ai-personal/blep.art");
+assert.equal(pkg.github, "https://github.com/BlackShuck89/reblep");
+assert.equal(pkg.repository.url, "git+https://github.com/BlackShuck89/reblep.git");
+assert.equal(meta.name, "%DISPLAYNAME%");
+assert(meta.updateURL.includes("v1.2.0-beta.8/script.meta.js"));
+assert(meta.downloadURL.includes("v1.2.0-beta.8/script.user.js"));
+assert(meta.icon.includes("BlackShuck89/reblep@master"));
+assert(meta.icon64.includes("BlackShuck89/reblep@master"));
+assert(read("src/js/components/utility/VersionChecker.ts").includes(
+  "https://api.github.com/repos/BlackShuck89/reblep/releases"),
+  "Update checker must use the renamed repository");
 assert.match(pkg.namespace, /\/blep\.art$/);
 assert.deepEqual(meta.match, ["https://blep.art/*"]);
 assert(meta.connect.includes("blep.art"), "Blep API origin must be permitted");
 assert(!meta.connect.includes("static1.e6ai.net"), "Old media origin must not be required");
-assert.match(meta.updateURL, /v1\.2\.0-beta\.7/);
-assert.match(meta.downloadURL, /v1\.2\.0-beta\.7/);
+assert.match(meta.updateURL, /v1\.2\.0-beta\.8/);
+assert.match(meta.downloadURL, /v1\.2\.0-beta\.8/);
 assert(extension.content_scripts.some((c) => c.matches.includes("https://blep.art/*")));
 assert.match(api, /query\["_client"\]\s*=\s*window\["re621"\]\["useragent"\]/);
 assert.match(api, /requestRateLimit\s*=\s*1000\s*;/);

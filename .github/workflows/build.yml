@@ -30,13 +30,13 @@ jobs:
         run: |
           test -s build/userscript/script.user.js
           test -s build/userscript/script.meta.js
-          grep -Fq "reBlep Personal" build/userscript/script.user.js
+          grep -Fq "reBlep" build/userscript/script.user.js
           grep -Fq "releases/download/$GIT_TAG_NAME/script.meta.js" build/userscript/script.user.js
       - name: Publish GitHub release
         uses: ncipollo/release-action@v1
         with:
           tag: ${{ github.ref_name }}
-          name: reBlep Personal ${{ github.ref_name }}
+          name: reBlep ${{ github.ref_name }}
           artifacts: "build/userscript/script.user.js,build/userscript/script.meta.js,build/userscript/altver.user.js,build/userscript/altver.meta.js"
           prerelease: ${{ contains(github.ref_name, '-beta') || contains(github.ref_name, '-rc') }}
           makeLatest: ${{ !(contains(github.ref_name, '-beta') || contains(github.ref_name, '-rc')) }}

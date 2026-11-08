@@ -1,0 +1,61 @@
+name: Publish reBlep 1.2.0 Beta 8
+
+# Runs once when the reBlep rename PR adds this workflow to master.
+# Subsequent version tags are handled by build.yml.
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - ".github/workflows/publish-reblep-beta8.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    env:
+      GIT_TAG_NAME: v1.2.0-beta.8
+    steps:
+      - name: Check out validated source
+        uses: actions/checkout@v4
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+      - name: Check version and userscript identity
+        run: |
+          test "$(node -p 'require("./package.json").version')" = "1.2.0-beta.8"
+          test "$(node -p 'require("./package.json").displayName')" = "reBlep"
+          node scripts/test-blep-target.js
+          bun run scripts/test-blep-api-fixture.mjs
+      - name: Lint and compile TypeScript
+        run: bun run compile-typescript:prod
+      - name: Compile styles
+        run: bun run compile-sass:prod
+      - name: Build installable userscript assets
+        run: bun run compose-userscript:prod
+      - name: Validate release assets
+        run: |
+          test -s build/userscript/script.user.js
+          test -s build/userscript/script.meta.js
+          test -s build/userscript/altver.user.js
+          test -s build/userscript/altver.meta.js
+          grep -Fq 'reBlep' build/userscript/script.meta.js
+          grep -Fq 'reBlep' build/userscript/script.user.js
+          grep -Fq '1.2.0-beta.8' build/userscript/script.meta.js
+          grep -Fq 'https://blep.art/*' build/userscript/script.meta.js
+          grep -Fq 'releases/download/v1.2.0-beta.8/script.user.js' build/userscript/script.meta.js
+          grep -Fq 'releases/download/v1.2.0-beta.8/script.meta.js' build/userscript/script.meta.js
+      - name: Publish Beta 8 GitHub prerelease
+        uses: ncipollo/release-action@v1
+        with:
+          tag: v1.2.0-beta.8
+          commit: ${{ github.sha }}
+          name: reBlep 1.2.0 Beta 8
+          bodyFile: docs/releases/v1.2.0-beta.8.md
+          artifacts: "build/userscript/script.user.js,build/userscript/script.meta.js,build/userscript/altver.user.js,build/userscript/altver.meta.js"
+          prerelease: true
+          makeLatest: false
+          allowUpdates: false

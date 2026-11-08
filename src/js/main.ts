@@ -1,5 +1,5 @@
 /**
- * reBlep Personal — blep.art Reimagined
+ * reBlep — blep.art Reimagined
  * Script root. Better keep this place tidy.
  */
 
