@@ -14,7 +14,7 @@ const extension = JSON.parse(read("bin/extension-manifest.json"));
 const api = read("src/js/components/api/E621.ts");
 const post = read("src/js/components/post/Post.ts");
 
-assert.equal(pkg.version, "1.2.0-beta.1");
+assert.equal(pkg.version, "1.2.0-beta.2");
 assert.match(pkg.displayName, /blep\.art/);
 assert.match(pkg.namespace, /\/blep\.art$/);
 assert.deepEqual(meta.match, ["https://blep.art/*"]);
@@ -27,6 +27,18 @@ assert.match(api, /query\["_client"\]\s*=\s*window\["re621"\]\["useragent"\]/);
 assert.match(api, /requestRateLimit\s*=\s*1000\s*;/);
 assert.match(api, /delay\s*<\s*E621\.requestRateLimit/);
 assert(!post.includes("static1.e6ai.net"), "Preview generation must not use the retired CDN");
+const main = read("src/js/main.ts");
+const miscellaneous = read("src/js/modules/general/Miscellaneous.ts");
+assert.match(post, /prepareViewingPostData\s*\(\)/,
+  "Post metadata fallback loader should exist");
+assert.match(post, /E621\.Post\.id\(match\[1\]\)\.first<APIPost>\(\)/,
+  "Post metadata fallback should request the current post JSON");
+assert.match(post, /text\.startsWith\("\{"\)/,
+  "Post parser should accept unencoded JSON as well as base64");
+assert.match(main, /await Post\.prepareViewingPostData\(\)/,
+  "Post metadata should be prefetched before module registration");
+assert.match(miscellaneous, /if \(links\.length === 0\) return;/,
+  "Remove-from-set helper should not parse post data without set links");
 for (const tracker of ["TagTracker", "PoolTracker", "CommentTracker"]) {
   const source = read(`src/js/modules/subscriptions/${tracker}.ts`);
   assert(!source.includes("e6ai.net"), `${tracker} must not link to the retired site`);
