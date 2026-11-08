@@ -9,17 +9,17 @@
     "icons-lib": [
         {
             "size": "32",
-            "url": "https://cdn.jsdelivr.net/gh/BlackShuck89/re6ai-personal@master/assets/icon32.png",
+            "url": "https://cdn.jsdelivr.net/gh/BlackShuck89/reblep@master/assets/icon32.png",
             "path": "./build/cache/icon32.png"
         },
         {
             "size": "64",
-            "url": "https://cdn.jsdelivr.net/gh/BlackShuck89/re6ai-personal@master/assets/icon64.png",
+            "url": "https://cdn.jsdelivr.net/gh/BlackShuck89/reblep@master/assets/icon64.png",
             "path": "./build/cache/icon64.png"
         },
         {
             "size": "129",
-            "url": "https://cdn.jsdelivr.net/gh/BlackShuck89/re6ai-personal@master/assets/icon128.png",
+            "url": "https://cdn.jsdelivr.net/gh/BlackShuck89/reblep@master/assets/icon128.png",
             "path": "./build/cache/icon128.png"
         }
     ],
