@@ -34,11 +34,11 @@ assert(!main.includes("await Post.prepareViewingPostData()"),
   "No post-data network request may block feature module registration");
 assert(!post.includes("prepareViewingPostData"),
   "Retain the previously working post model without eager post-data requests");
-assert.match(miscellaneous, /Number\\(Page\\.getPageID\\(\\)\\)/,
+assert(miscellaneous.includes("const postID = Number(Page.getPageID());"),
   "Set-removal must derive the post ID without reading full post data");
-assert.match(miscellaneous, /PostActions\\.removeSet\\(id, postID\\)/,
+assert(miscellaneous.includes("PostActions.removeSet(id, postID);"),
   "Set-removal must use the validated page ID");
-assert.match(miscellaneous, /catch \\(domError\\)/,
+assert(miscellaneous.includes("catch (domError)"),
   "The optional Reupload shortcut should recover locally from missing post metadata");
 const setLinkPattern = new RegExp("/post_sets/([0-9]+)(?:[/?#]|$)");
 assert.equal("/post_sets/123".match(setLinkPattern)[1], "123");
