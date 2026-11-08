@@ -15,7 +15,9 @@ const api = read("src/js/components/api/E621.ts");
 const post = read("src/js/components/post/Post.ts");
 
 assert.equal(pkg.version, "1.2.0-beta.7");
-assert.match(pkg.displayName, /blep\.art/);
+assert.equal(pkg.name, "reblep-personal");
+assert.equal(pkg.displayName, "reBlep Personal");
+assert.equal(pkg.namespace, "https://github.com/BlackShuck89/re6ai-personal/blep.art");
 assert.match(pkg.namespace, /\/blep\.art$/);
 assert.deepEqual(meta.match, ["https://blep.art/*"]);
 assert(meta.connect.includes("blep.art"), "Blep API origin must be permitted");
