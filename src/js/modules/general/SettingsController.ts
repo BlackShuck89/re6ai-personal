@@ -72,8 +72,8 @@ export class SettingsController extends RE6Module {
     // Create a button in the header
     this.openSettingsButton = Util.DOM.addSettingsButton({
       id: "header-button-settings",
-      name: `${Icons.get("wrench")} <span>re6AI Personal</span>`,
-      title: "re6AI Personal Settings",
+      name: `${Icons.get("wrench")} <span>reBlep Personal</span>`,
+      title: "reBlep Personal Settings",
       tabClass: "nav-re6-settings",
       attr: {
         "data-loading": "false",
