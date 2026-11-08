@@ -40,7 +40,7 @@ jobs:
       - name: Assert generated artifact
         run: |
           test -s build/userscript/script.user.js
-          grep -q 're6AI Personal' build/userscript/script.user.js
+          grep -q 'reBlep Personal' build/userscript/script.user.js
           test -s build/userscript/script.meta.js
           grep -Fq "releases/download/$GIT_TAG_NAME/script.meta.js" build/userscript/script.user.js
           grep -Fq "releases/download/$GIT_TAG_NAME/script.user.js" build/userscript/script.user.js
