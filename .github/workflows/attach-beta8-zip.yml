@@ -1,0 +1,53 @@
+name: Attach reBlep Beta 8 ZIP to published release
+
+# One-time backfill for v1.2.0-beta.8.
+# Future tagged releases create their ZIP directly in build.yml.
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - ".github/workflows/attach-beta8-zip.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      TAG: v1.2.0-beta.8
+      ZIP_FILE: reBlep-v1.2.0-beta.8.zip
+    steps:
+      - name: Retrieve exactly the released userscript files
+        env:
+          GH_REPO: BlackShuck89/reblep
+        run: |
+          set -euo pipefail
+          mkdir -p release-files
+          gh release download "$TAG" --pattern "*.js" --dir release-files
+          for asset in script.user.js script.meta.js altver.user.js altver.meta.js; do
+            test -s "release-files/$asset"
+          done
+          grep -Fq 'reBlep' release-files/script.user.js
+          test "$(find release-files -maxdepth 1 -name '*.js' -type f | wc -l)" -eq 4
+
+      - name: Package and validate ZIP
+        run: |
+          set -euo pipefail
+          zip -j -9 "$ZIP_FILE" \
+            release-files/script.user.js \
+            release-files/script.meta.js \
+            release-files/altver.user.js \
+            release-files/altver.meta.js
+          unzip -t "$ZIP_FILE"
+          test "$(unzip -Z1 "$ZIP_FILE" | wc -l)" -eq 4
+
+      - name: Attach ZIP to existing GitHub prerelease
+        env:
+          GH_REPO: BlackShuck89/reblep
+        run: |
+          set -euo pipefail
+          gh release upload "$TAG" "$ZIP_FILE" --clobber
+          gh release view "$TAG" --json assets --jq '.assets[].name' | grep -Fx "$ZIP_FILE"
