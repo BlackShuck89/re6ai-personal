@@ -167,7 +167,7 @@ export class DownloadCustomizer extends RE6Module {
         this.post = PostData.fromAPI(apiPost, "0");
         return this.post;
       } catch (error) {
-        console.error("re6AI Personal: cannot load current post metadata for download", error);
+        console.error("reBlep Personal: cannot load current post metadata for download", error);
         return null;
       }
     })();
@@ -226,12 +226,12 @@ export class DownloadCustomizer extends RE6Module {
       onerror: (error) => {
         this.downloading = false;
         Danbooru.error("Unable to download this file. See the browser console for details.");
-        console.error("re6AI Personal: named download failed", error);
+        console.error("reBlep Personal: named download failed", error);
       },
       ontimeout: (error) => {
         this.downloading = false;
         Danbooru.error("The file download timed out.");
-        console.error("re6AI Personal: named download timed out", error);
+        console.error("reBlep Personal: named download timed out", error);
       },
     });
   }
