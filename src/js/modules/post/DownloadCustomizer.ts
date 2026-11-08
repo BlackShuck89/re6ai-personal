@@ -153,7 +153,7 @@ export class DownloadCustomizer extends RE6Module {
 
       // Some themes show alternate original/sample resolutions in a dropdown.
       // Limit this fallback to actual media paths inside download menus.
-      return /\\/data\\/(?:original\\/|sample\\/|preview\\/)?/i.test(url.pathname)
+      return url.pathname.includes("/data/")
         && (link.hasAttribute("download") || !!link.closest(".ptbr-etc-download"));
     } catch {
       return false;
