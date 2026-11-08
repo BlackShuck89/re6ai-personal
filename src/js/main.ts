@@ -7,6 +7,7 @@
 import { Danbooru } from "./components/api/Danbooru";
 import { Page, PageDefinition } from "./components/data/Page";
 import { User } from "./components/data/User";
+import { Post } from "./components/post/Post";
 import { ModuleController } from "./components/ModuleController";
 import { CleanSlate } from "./components/structure/CleanSlate";
 import { StartupTasks } from "./components/structure/StartupTasks";
