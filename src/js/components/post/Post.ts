@@ -1,10 +1,8 @@
 import { PostViewer } from "../../modules/post/PostViewer";
 import { BetterSearch } from "../../modules/search/BetterSearch";
 import { CustomFlagger } from "../../modules/search/CustomFlagger";
-import { E621 } from "../api/E621";
 import { APIPost, PostFlag, PostRating } from "../api/responses/APIPost";
 import { Blacklist } from "../data/Blacklist";
-import { Page, PageDefinition } from "../data/Page";
 import { Tag } from "../data/Tag";
 import { ModuleController } from "../ModuleController";
 import { Debug } from "../utility/Debug";
@@ -13,8 +11,6 @@ import { PostParts } from "./PostParts";
 import { PostSet } from "./PostSet";
 
 export class Post implements PostData {
-
-  private static prefetchedViewingPost: PostData | null = null;
 
   public $ref: JQuery<HTMLElement>;       // reference to the post's DOM object
 
@@ -288,38 +284,7 @@ export class Post implements PostData {
   public static getViewingPost (): Post {
     const container = $("#image-container");
     if (container.data("wfpost") !== undefined) return Post.get(container);
-    return new Post(this.prefetchedViewingPost || PostData.fromDOM(), container);
-  }
-
-  /**
-   * Load the current post before modules initialize.
-   *
-   * The old e6AI layout embeds a base64 `#post-data` block. On blep.art
-   * this element may be absent or use different fields, so fall back to the
-   * normal post JSON endpoint. Cache the data only; the Post instance must
-   * still be created after module registration has initialized filters.
-   */
-  public static async prepareViewingPostData (): Promise<void> {
-    if (!Page.matches(PageDefinition.post)) return;
-
-    try {
-      this.prefetchedViewingPost = PostData.fromDOM();
-      return;
-    } catch (domError) {
-      const match = window.location.pathname.match(/^\/posts\/(\d+)/);
-      if (!match) return;
-
-      try {
-        const data = await E621.Post.id(match[1]).first<APIPost>();
-        if (!data || !data.id) throw new Error("Post API returned no post data");
-        this.prefetchedViewingPost = PostData.fromAPI(data, "0");
-        Debug.log("Post data loaded via JSON API instead of page metadata");
-      } catch (apiError) {
-        // Leave unrelated modules available and preserve diagnostics if the
-        // site or the user's session cannot return post data.
-        console.warn("re6AI Personal: post data unavailable from DOM and API", domError, apiError);
-      }
-    }
+    return new Post(PostData.fromDOM(), container);
   }
 
   /**
@@ -613,32 +578,13 @@ export namespace PostData {
   export function fromDOM (): PostData {
 
     const rawPostData = document.getElementById("post-data");
-    if (!rawPostData || !rawPostData.textContent || !rawPostData.textContent.trim())
-      throw new Error("Post metadata block is unavailable");
+    if (!rawPostData) throw new Error("Post data not found in DOM");
 
-    const text = rawPostData.textContent.trim();
-    let currentPostData: RawPostObject;
-    try {
-      // The original site embeds base64 JSON. Some versions output plain
-      // JSON, which should not be passed through atob().
-      const decoded = text.startsWith("{") ? text : atob(text);
-      const payload = JSON.parse(decoded);
-      const post = payload && payload.post ? payload.post : payload;
+    const decodedData = atob(rawPostData.textContent || "");
+    if (!decodedData) throw new Error("Post data is empty");
 
-      // Some Danbooru versions embed the API response rather than the
-      // legacy page-specific `files` / `stats` shape.
-      if (post && post.file && post.score && post.tags)
-        return PostData.fromAPI(post as APIPost, "0");
-
-      currentPostData = post as RawPostObject;
-    } catch (error) {
-      throw new Error("Post metadata is not valid JSON or base64 JSON");
-    }
-
-    if (!currentPostData || !currentPostData.files || !currentPostData.files.meta
-      || !currentPostData.files.original || !currentPostData.stats
-      || !currentPostData.flags || !currentPostData.tags || !currentPostData.relationships)
-      throw new Error("Post metadata has an unsupported structure");
+    const currentPostData = JSON.parse(decodedData) as RawPostObject;
+    console.log("CurrentPostData:", currentPostData);
 
     const flags = new Set<PostFlag>();
     if (currentPostData.flags.pending) flags.add(PostFlag.Pending);
