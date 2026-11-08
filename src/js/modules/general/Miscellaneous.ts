@@ -458,7 +458,7 @@ export class Miscellaneous extends RE6Module {
 
     for (const link of links.get()) {
       const $link = $(link);
-      const match = ($link.attr("href") || "").match(/\\/post_sets\\/(\\d+)(?:[/?#]|$)/);
+      const match = ($link.attr("href") || "").match(new RegExp("/post_sets/([0-9]+)(?:[/?#]|$)"));
       if (!match) continue;
       const id = Number(match[1]);
       if (!Number.isSafeInteger(id) || id <= 0) continue;
