@@ -1,0 +1,57 @@
+name: Publish initial blep.art beta
+
+# One-time release when the port PR first adds this workflow to master.
+# Future tagged releases are handled by .github/workflows/build.yml.
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - ".github/workflows/publish-blep-beta.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  beta:
+    runs-on: ubuntu-latest
+    env:
+      GIT_TAG_NAME: v1.2.0-beta.1
+    steps:
+      - name: Check out tagged source
+        uses: actions/checkout@v4
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+      - name: Check version and domain-specific assumptions
+        run: |
+          test "$(node -p 'require("./package.json").version')" = "1.2.0-beta.1"
+          node scripts/test-blep-target.js
+      - name: Typecheck, lint and compile
+        run: bun run compile-typescript:prod
+      - name: Compile styles
+        run: bun run compile-sass:prod
+      - name: Build userscript
+        run: bun run compose-userscript:prod
+      - name: Verify release assets
+        run: |
+          test -s build/userscript/script.user.js
+          test -s build/userscript/script.meta.js
+          test -s build/userscript/altver.user.js
+          test -s build/userscript/altver.meta.js
+          grep -Fq 'https://blep.art/*' build/userscript/script.meta.js
+          grep -Fq 'v1.2.0-beta.1/script.user.js' build/userscript/script.meta.js
+          grep -Fq 'v1.2.0-beta.1/script.meta.js' build/userscript/script.meta.js
+          grep -Fq '1.2.0-beta.1' build/userscript/script.meta.js
+      - name: Publish GitHub beta prerelease
+        uses: ncipollo/release-action@v1
+        with:
+          tag: v1.2.0-beta.1
+          commit: ${{ github.sha }}
+          name: re6AI Personal 1.2.0 Beta 1 — blep.art
+          bodyFile: docs/releases/v1.2.0-beta.1.md
+          artifacts: "build/userscript/script.user.js,build/userscript/script.meta.js,build/userscript/altver.user.js,build/userscript/altver.meta.js"
+          prerelease: true
+          makeLatest: false
+          allowUpdates: false
