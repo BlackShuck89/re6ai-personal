@@ -1,15 +1,15 @@
 {
-  "name": "re6ai-personal",
-  "displayName": "re6AI Personal — blep.art",
+  "name": "reblep-personal",
+  "displayName": "reBlep Personal",
   "namespace": "https://github.com/BlackShuck89/re6ai-personal/blep.art",
   "version": "1.2.0-beta.7",
-  "description": "Independently maintained enhancement userscript for blep.art, adapted from re6AI/re621",
+  "description": "Independent enhancement userscript for blep.art, based on re6AI and re621",
   "author": "bitWolfy",
   "contributors": [
     "bitWolfy",
     "Sindrake",
     "Earlopain",
-    "BlackShuck89 (personal fork)"
+    "BlackShuck89"
   ],
   "main": "./build/script.user.js",
   "scripts": {
