@@ -128,6 +128,10 @@ CleanSlate.createDOM().then(async () => {
 
   User.init();
 
+  // Populate individual post data before synchronous modules request it.
+  // If blep.art lacks the old encoded #post-data structure, use its JSON API.
+  await Post.prepareViewingPostData();
+
   // Subscriptions have to be registered before the SubscriptionManager
   await ModuleController.register(subscriptions);
   await SubscriptionManager.register(subscriptions);
