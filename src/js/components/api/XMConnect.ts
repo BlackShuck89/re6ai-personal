@@ -189,13 +189,13 @@ export class XMConnect {
       : a;
 
     if (!details.url || !details.name) {
-      console.error("re6AI Personal: download URL or filename is missing", details);
+      console.error("reBlep Personal: download URL or filename is missing", details);
       return;
     }
 
     const onError = (event: GMxmlHttpRequestEvent): void => {
       if (details.onerror) details.onerror(event as GMxmlHttpRequestError);
-      else console.error("re6AI Personal: download failed", event);
+      else console.error("reBlep Personal: download failed", event);
     };
 
     XMConnect.xmlHttpRequest({
@@ -231,7 +231,7 @@ export class XMConnect {
           anchor.click();
           if (details.onload) details.onload(event);
         } catch (error) {
-          console.error("re6AI Personal: unable to start browser download", error);
+          console.error("reBlep Personal: unable to start browser download", error);
           onError(event);
         } finally {
           // Keep the object URL alive until the browser has consumed the click.
